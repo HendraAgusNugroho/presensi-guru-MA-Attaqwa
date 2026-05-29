@@ -1,0 +1,11 @@
+# Konfigurasi deploy Railway — Sistem Presensi Guru
+# Docs: https://docs.railway.com/reference/config-as-code
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "composer install --no-dev --optimize-autoloader --no-interaction"
+
+[deploy]
+startCommand = "bash scripts/railway-start.sh"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

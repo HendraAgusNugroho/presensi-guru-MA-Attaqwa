@@ -1,0 +1,464 @@
+<?php $__env->startSection('title','Dashboard'); ?>
+
+<?php $__env->startPush('styles'); ?>
+<style>
+.super-admin-banner {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    border-radius: 14px; padding: 16px 20px; color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 18px;
+}
+.school-welcome {
+    background: linear-gradient(135deg, hsl(145,60%,18%), hsl(145,55%,28%));
+    border-radius: 14px; padding: 18px 22px; color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+}
+.school-welcome h2 { font-size: 1.15rem; font-weight: 800; margin-bottom: 3px; }
+.school-welcome p  { font-size: .85rem; opacity: .85; }
+.school-welcome .date-badge {
+    background: rgba(255,255,255,.15); padding: 8px 16px; border-radius: 10px;
+    font-size: .85rem; font-weight: 700; text-align: center;
+    border: 1px solid rgba(255,255,255,.2); white-space: nowrap;
+}
+.school-welcome .date-badge .day { font-size: 1.4rem; font-weight: 900; display: block; }
+
+.greeting-card {
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1.5px solid;
+}
+.greeting-card__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.greeting-card__icon i { font-size: 1.1rem; }
+.greeting-card__title { font-weight: 800; font-size: .92rem; }
+.greeting-card__sub { font-size: .82rem; color: #475569; margin-top: 2px; }
+.greeting-card--pagi { background: #fffbeb; border-color: #fde68a; }
+.greeting-card--pagi .greeting-card__icon { background: rgba(217, 119, 6, .12); }
+.greeting-card--pagi .greeting-card__icon i,
+.greeting-card--pagi .greeting-card__title { color: #d97706; }
+.greeting-card--siang { background: #f0f9ff; border-color: #bae6fd; }
+.greeting-card--siang .greeting-card__icon { background: rgba(2, 132, 199, .12); }
+.greeting-card--siang .greeting-card__icon i,
+.greeting-card--siang .greeting-card__title { color: #0284c7; }
+.greeting-card--sore { background: #faf5ff; border-color: #ddd6fe; }
+.greeting-card--sore .greeting-card__icon { background: rgba(124, 58, 237, .12); }
+.greeting-card--sore .greeting-card__icon i,
+.greeting-card--sore .greeting-card__title { color: #7c3aed; }
+.greeting-card--malam { background: #eff6ff; border-color: #bfdbfe; }
+.greeting-card--malam .greeting-card__icon { background: rgba(30, 64, 175, .12); }
+.greeting-card--malam .greeting-card__icon i,
+.greeting-card--malam .greeting-card__title { color: #1e40af; }
+</style>
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startSection('content'); ?>
+
+
+<?php if(auth()->user()->isSuperAdmin()): ?>
+<div class="super-admin-banner">
+    <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:44px;height:44px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-shield-halved" style="font-size:1.2rem"></i>
+        </div>
+        <div>
+            <div style="font-weight:800;font-size:1rem">Mode Super Admin Aktif</div>
+            <div style="font-size:.8rem;opacity:.85">Anda memiliki akses penuh ke seluruh sistem</div>
+        </div>
+    </div>
+    <a href="<?php echo e(route('pengguna.index')); ?>"
+       style="background:rgba(255,255,255,.15);color:#fff;padding:8px 16px;border-radius:8px;
+              text-decoration:none;font-weight:700;font-size:.85rem;border:1px solid rgba(255,255,255,.3);
+              display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-users-gear"></i> Kelola Pengguna
+    </a>
+</div>
+<?php endif; ?>
+
+
+<div class="school-welcome">
+    <div style="display:flex;align-items:center;gap:16px">
+        <div style="width:52px;height:52px;background:hsl(48,96%,53%);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.2);">
+            <i class="fas fa-mosque" style="color:hsl(145,60%,18%);font-size:1.2rem"></i>
+        </div>
+        <div>
+            <h2>Selamat datang, <?php echo e(auth()->user()->name); ?>!</h2>
+            <p>YPIA Daarul Mu'min — Madrasah Aliyah Attaqwa Benda Tangerang</p>
+        </div>
+    </div>
+    <div class="date-badge">
+        <span class="day"><?php echo e($today->format('d')); ?></span>
+        <?php echo e($today->isoFormat('MMMM Y')); ?><br>
+        <span style="font-size:.75rem;opacity:.8"><?php echo e($today->isoFormat('dddd')); ?></span>
+    </div>
+</div>
+
+
+<?php
+    $jam = (int) now()->format('H');
+    if ($jam >= 5 && $jam < 12) {
+        $greetClass = 'greeting-card--pagi';
+        $greetIcon  = 'fa-sun';
+        $greetText  = 'Selamat Pagi';
+        $greetSub   = 'Semoga aktivitas mengajar hari ini berjalan lancar dan penuh berkah.';
+    } elseif ($jam >= 12 && $jam < 15) {
+        $greetClass = 'greeting-card--siang';
+        $greetIcon  = 'fa-cloud-sun';
+        $greetText  = 'Selamat Siang';
+        $greetSub   = 'Tetap semangat dalam menjalankan aktivitas di sekolah.';
+    } elseif ($jam >= 15 && $jam < 18) {
+        $greetClass = 'greeting-card--sore';
+        $greetIcon  = 'fa-cloud-sun-rain';
+        $greetText  = 'Selamat Sore';
+        $greetSub   = 'Terima kasih atas dedikasi Anda hari ini untuk pendidikan.';
+    } else {
+        $greetClass = 'greeting-card--malam';
+        $greetIcon  = 'fa-moon';
+        $greetText  = 'Selamat Malam';
+        $greetSub   = 'Jangan lupa menjaga kesehatan dan istirahat yang cukup.';
+    }
+?>
+<div class="greeting-card <?php echo e($greetClass); ?>">
+    <div class="greeting-card__icon">
+        <i class="fas <?php echo e($greetIcon); ?>"></i>
+    </div>
+    <div>
+        <div class="greeting-card__title"><?php echo e($greetText); ?>, <?php echo e(auth()->user()->name); ?>!</div>
+        <div class="greeting-card__sub"><?php echo e($greetSub); ?></div>
+    </div>
+</div>
+
+
+<div class="stats-grid">
+    <div class="stat-card total">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="stat-label">Total Guru Aktif</div>
+        <div class="stat-value"><?php echo e($totalGuru); ?></div>
+    </div>
+    <div class="stat-card hadir">
+        <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+        <div class="stat-label">Hadir Hari Ini</div>
+        <div class="stat-value"><?php echo e($hadirHariIni); ?></div>
+    </div>
+    <div class="stat-card telat">
+        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+        <div class="stat-label">Terlambat</div>
+        <div class="stat-value"><?php echo e($telatHariIni); ?></div>
+    </div>
+    <div class="stat-card absen">
+        <div class="stat-icon"><i class="fas fa-user-xmark"></i></div>
+        <div class="stat-label">Tidak Hadir</div>
+        <div class="stat-value"><?php echo e($tidakHadir); ?></div>
+    </div>
+    <div class="stat-card izin">
+        <div class="stat-icon"><i class="fas fa-file-circle-check"></i></div>
+        <div class="stat-label">Izin</div>
+        <div class="stat-value"><?php echo e($izinHariIni); ?></div>
+    </div>
+    <div class="stat-card sakit">
+        <div class="stat-icon"><i class="fas fa-kit-medical"></i></div>
+        <div class="stat-label">Sakit</div>
+        <div class="stat-value"><?php echo e($sakitHariIni); ?></div>
+    </div>
+</div>
+
+
+<div class="card-grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-chart-line" style="color:hsl(145,60%,28%)"></i> Presensi 7 Hari Terakhir</h3>
+        </div>
+        <div style="position:relative;height:220px;">
+            <canvas id="chartPresensi"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-chart-pie" style="color:hsl(48,96%,50%)"></i> Status Hari Ini</h3>
+        </div>
+        <div style="position:relative;height:220px;">
+            <canvas id="chartStatus"></canvas>
+        </div>
+    </div>
+</div>
+
+
+<div class="card-grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-clock-rotate-left" style="color:hsl(145,60%,28%)"></i> Scan Terbaru</h3>
+            <a href="<?php echo e(route('presensi.index')); ?>" class="btn btn-secondary btn-sm">Lihat Semua</a>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>Nama Guru</th><th>Jam Masuk</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                <?php $__empty_1 = true; $__currentLoopData = $riwayatScan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <tr>
+                    <td>
+                        <strong><?php echo e($p->guru->nama ?? '-'); ?></strong><br>
+                        <small style="color:#5a7a5a;font-size:.78rem"><?php echo e($p->guru->id_pengguna ?? ''); ?></small>
+                    </td>
+                    <td style="font-weight:600;color:hsl(145,60%,28%)"><?php echo e($p->jam_masuk ?? '-'); ?></td>
+                    <td>
+                        <span class="badge badge-<?php echo e(str_replace('_','-',$p->status)); ?>">
+                            <?php echo e(strtoupper(str_replace('_',' ',$p->status))); ?>
+
+                        </span>
+                    </td>
+                </tr>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                <tr>
+                    <td colspan="3">
+                        <div class="empty-state" style="padding:24px">
+                            <i class="fas fa-calendar-xmark"></i>
+                            Belum ada scan hari ini
+                        </div>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-bell" style="color:hsl(48,96%,50%)"></i> Guru Terlambat Hari Ini</h3>
+            <?php if(count($guruTelat) > 0): ?>
+                <span class="badge" style="background:#fef9c3;color:#a16207"><?php echo e(count($guruTelat)); ?> guru</span>
+            <?php endif; ?>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>Nama Guru</th><th>Jam Masuk</th><th>Telat</th></tr>
+                </thead>
+                <tbody>
+                <?php $__empty_1 = true; $__currentLoopData = $guruTelat; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <tr>
+                    <td><strong><?php echo e($p->guru->nama ?? '-'); ?></strong></td>
+                    <td style="color:#f59e0b;font-weight:600"><?php echo e($p->jam_masuk); ?></td>
+                    <td>
+                        <span style="background:#fef9c3;color:#92400e;padding:3px 10px;border-radius:99px;font-size:.8rem;font-weight:700">
+                            +<?php echo e($p->menit_telat); ?> mnt
+                        </span>
+                    </td>
+                </tr>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                <tr>
+                    <td colspan="3">
+                        <div class="empty-state" style="padding:24px">
+                            <i class="fas fa-circle-check" style="color:#22c55e"></i>
+                            <span style="color:#22c55e;font-weight:600">Tidak ada guru terlambat</span>
+                        </div>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<?php if($jadwal): ?>
+<?php $toleransiMenit = $jadwal->toleransiMenit(); ?>
+<div class="card" style="background:linear-gradient(135deg,hsl(145,60%,96%),hsl(48,96%,96%));border:1px solid #d4e8d4">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div style="width:44px;height:44px;background:hsl(145,60%,28%);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="fas fa-clock" style="color:#fff;font-size:1.1rem"></i>
+        </div>
+        <div>
+            <div style="font-weight:800;color:hsl(145,60%,18%);margin-bottom:2px">
+                Jadwal Aktif: <?php echo e($jadwal->nama_jadwal); ?>
+
+            </div>
+            <div style="font-size:.85rem;color:hsl(145,60%,30%);display:flex;gap:16px;flex-wrap:wrap">
+                <span><i class="fas fa-right-to-bracket"></i> Masuk: <strong><?php echo e($jadwal->jam_masuk); ?></strong></span>
+                <span><i class="fas fa-hourglass-half"></i> Toleransi: <strong><?php echo e($toleransiMenit); ?> menit</strong></span>
+                <span><i class="fas fa-right-from-bracket"></i> Pulang: <strong><?php echo e($jadwal->jam_pulang); ?></strong></span>
+            </div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+            <?php if(auth()->user()->isSuperAdmin()): ?>
+            <button type="button"
+                    onclick="openModalEditJadwal()"
+                    class="btn btn-sm"
+                    aria-haspopup="dialog"
+                    aria-controls="modal-edit-jadwal"
+                    style="background:hsl(145,60%,28%);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:700">
+                <i class="fas fa-pen-to-square"></i> Edit Jadwal
+            </button>
+            <?php endif; ?>
+            <a href="<?php echo e(route('laporan.index')); ?>" class="btn btn-primary btn-sm">
+                <i class="fas fa-chart-bar"></i> Lihat Laporan
+            </a>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if(auth()->user()->isSuperAdmin() && $jadwal): ?>
+<div id="modal-edit-jadwal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="modal-edit-jadwal-title"
+     aria-hidden="true"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;
+            align-items:center;justify-content:center;padding:16px">
+    <div style="background:#fff;border-radius:16px;padding:28px;width:100%;max-width:420px;
+                box-shadow:0 20px 60px rgba(0,0,0,.25)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <h3 id="modal-edit-jadwal-title" style="font-weight:800;color:hsl(145,60%,18%);font-size:1rem;margin:0">
+                <i class="fas fa-clock" style="color:hsl(145,60%,35%);margin-right:8px" aria-hidden="true"></i>
+                Edit Jadwal Aktif
+            </h3>
+            <button type="button" onclick="closeModalEditJadwal()"
+                    aria-label="Tutup dialog"
+                    style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">
+                &times;
+            </button>
+        </div>
+        <form method="POST" action="<?php echo e(route('jadwal_masuk.update_dashboard', $jadwal)); ?>">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PATCH'); ?>
+            <div style="margin-bottom:14px">
+                <label style="font-size:.85rem;font-weight:600;color:#374151;display:block;margin-bottom:4px">Jam Masuk</label>
+                <input type="time" name="jam_masuk" class="form-control"
+                       value="<?php echo e(\Carbon\Carbon::parse($jadwal->jam_masuk)->format('H:i')); ?>" required>
+            </div>
+            <div style="margin-bottom:14px">
+                <label style="font-size:.85rem;font-weight:600;color:#374151;display:block;margin-bottom:4px">Jam Pulang</label>
+                <input type="time" name="jam_pulang" class="form-control"
+                       value="<?php echo e(\Carbon\Carbon::parse($jadwal->jam_pulang)->format('H:i')); ?>" required>
+            </div>
+            <div style="margin-bottom:20px">
+                <label style="font-size:.85rem;font-weight:600;color:#374151;display:block;margin-bottom:4px">Toleransi Keterlambatan (menit)</label>
+                <input type="number" name="batas_toleransi" class="form-control"
+                       value="<?php echo e($toleransiMenit); ?>" min="0" max="120" required>
+            </div>
+            <div style="display:flex;gap:10px">
+                <button type="submit" class="btn btn-primary" style="flex:1">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+                <button type="button"
+                        onclick="closeModalEditJadwal()"
+                        class="btn btn-secondary">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startPush('scripts'); ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="application/json" id="grafik-data-json"><?php echo json_encode($grafikData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?></script>
+<script type="application/json" id="status-chart-data-json"><?php echo json_encode([$hadirHariIni, $telatHariIni, $tidakHadir, $izinHariIni, $sakitHariIni], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?></script>
+<script>
+function openModalEditJadwal() {
+    var modal = document.getElementById('modal-edit-jadwal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+}
+function closeModalEditJadwal() {
+    var modal = document.getElementById('modal-edit-jadwal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+}
+document.getElementById('modal-edit-jadwal')
+    ?.addEventListener('click', function(e) {
+        if (e.target === this) closeModalEditJadwal();
+    });
+
+function initDashboardCharts() {
+    if (typeof Chart === 'undefined') return;
+    var grafikNode = document.getElementById('grafik-data-json');
+    var statusNode = document.getElementById('status-chart-data-json');
+    if (!grafikNode || !statusNode) return;
+
+    var grafikData = JSON.parse(grafikNode.textContent);
+    var statusChartData = JSON.parse(statusNode.textContent);
+    var labels = grafikData.map(function(d) { return d.tanggal; });
+
+new Chart(document.getElementById('chartPresensi'), {
+    type: 'line',
+    data: {
+        labels,
+        datasets: [
+            {
+                label: 'Hadir',
+                data: grafikData.map(d => d.hadir),
+                borderColor: 'hsl(145,60%,35%)',
+                backgroundColor: 'hsla(145,60%,35%,.12)',
+                tension: .4, fill: true, pointRadius: 4, pointHoverRadius: 6,
+            },
+            {
+                label: 'Terlambat',
+                data: grafikData.map(d => d.telat),
+                borderColor: 'hsl(48,96%,45%)',
+                backgroundColor: 'hsla(48,96%,45%,.1)',
+                tension: .4, fill: true, pointRadius: 4, pointHoverRadius: 6,
+            },
+            {
+                label: 'Tidak Hadir',
+                data: grafikData.map(d => d.tidak_hadir),
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239,68,68,.08)',
+                tension: .4, fill: true, pointRadius: 4, pointHoverRadius: 6,
+            },
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14 } } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+
+new Chart(document.getElementById('chartStatus'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Hadir', 'Terlambat', 'Tidak Hadir', 'Izin', 'Sakit'],
+        datasets: [{
+            data: statusChartData,
+            backgroundColor: ['hsl(145,60%,35%)', 'hsl(48,96%,50%)', '#ef4444', '#3b82f6', '#f97316'],
+            borderWidth: 0,
+            hoverOffset: 8,
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14 } }
+        }
+    }
+});
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboardCharts);
+} else {
+    initDashboardCharts();
+}
+</script>
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\laravel-presensi-guru\resources\views\dashboard\index.blade.php ENDPATH**/ ?>

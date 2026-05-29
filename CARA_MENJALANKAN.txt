@@ -1,0 +1,206 @@
+==========================================================
+  SISTEM PRESENSI GURU MA ATTAQWA — PANDUAN MENJALANKAN
+  (Versi terbaru — semua bug dan isu keamanan sudah diperbaiki)
+==========================================================
+
+▶ CARA PERTAMA KALI (Fresh Install / Server Baru)
+--------------------------------------------------
+1. Extract project ke folder htdocs (XAMPP) atau www (LARAGON).
+   Contoh: C:\xampp\htdocs\presensi-guru\
+
+2. Buka terminal di folder project, jalankan:
+   composer install
+
+3. Salin .env.example menjadi .env (JANGAN pakai .env dari ZIP):
+   copy .env.example .env  (Windows)
+   cp .env.example .env    (Linux/Mac)
+
+4. Generate APP_KEY baru di server:
+   php artisan key:generate
+
+5. Buat database MySQL bernama: presensi_guru
+   (Lewat phpMyAdmin atau MySQL CLI)
+
+6. Setting .env sesuai server Anda:
+   DB_DATABASE=presensi_guru
+   DB_USERNAME=root
+   DB_PASSWORD=
+   APP_URL=https://domain-hosting-anda.sch.id
+
+7. Jalankan migration:
+   php artisan migrate
+
+8. Import data guru dari Excel (seed):
+   php artisan db:seed
+
+9. Jalankan project:
+   php artisan serve
+   → Akses: http://localhost:8000
+
+----------------------------------------------------------
+▶ UPDATE (Jika database sudah ada dari versi sebelumnya)
+----------------------------------------------------------
+1. Jalankan migration baru (WAJIB):
+   php artisan migrate
+
+   Migration baru yang akan berjalan:
+   - 2024_06_02_000001 → Tambah 'sistem' ke ENUM metode presensis
+   - 2024_06_02_000002 → Rename kolom nip → id_pengguna (users & gurus)
+                         [kompatibel MySQL 5.7 dan 8+]
+   - 2024_06_02_000003 → Tambah index performa pada tabel presensis & gurus
+
+2. Update data guru dari Excel:
+   php artisan db:seed --force
+   (Aman — memakai updateOrCreate, tidak hapus data presensi)
+
+3. Clear cache:
+   php artisan cache:clear && php artisan config:clear && php artisan view:clear
+
+----------------------------------------------------------
+▶ KEAMANAN — WAJIB DILAKUKAN SEBELUM PRODUCTION
+----------------------------------------------------------
+⚠ 1. Generate APP_KEY baru (JANGAN pakai key dari ZIP):
+      php artisan key:generate
+      (Key lama sudah dianggap bocor karena ikut dalam file ZIP)
+
+⚠ 2. Set production di .env:
+      APP_ENV=production
+      APP_DEBUG=false
+
+⚠ 3. Isi FINGERPRINT_API_KEY di .env (min. 32 karakter):
+      FINGERPRINT_API_KEY=isi_dengan_32_karakter_acak_disini
+      Cara generate: php -r "echo bin2hex(random_bytes(16));"
+
+⚠ 4. Sebelum db:seed di production, isi password kuat:
+      SEED_SUPER_ADMIN_PASSWORD=password_kuat_min_12_karakter
+      SEED_ADMIN_PASSWORD=password_kuat_min_12_karakter
+
+⚠ 5. JANGAN sertakan .env di ZIP deploy. Gunakan:
+      .\scripts\build-deploy.ps1
+      Lihat juga DEPLOY_KEAMANAN.md
+
+⚠ 6. Ganti password semua akun setelah login pertama (menu Profil).
+      Password guru awal = ID guru (A, B, C, dst.) — wajib diganti.
+
+⚠ 4. Pastikan hosting menggunakan HTTPS/SSL.
+      Jika belum ada SSL → ubah .env:
+      SESSION_SECURE_COOKIE=false
+      (Jika tetap true tapi tidak ada SSL, login akan gagal)
+
+⚠ 8. Konfigurasi MAIL untuk notifikasi izin/sakit:
+      Ganti dari Mailpit ke SMTP Gmail atau cPanel hosting:
+      MAIL_MAILER=smtp
+      MAIL_HOST=smtp.gmail.com
+      MAIL_PORT=587
+      MAIL_USERNAME=email@sekolah.sch.id
+      MAIL_PASSWORD=app_password_gmail
+      MAIL_ENCRYPTION=tls
+      MAIL_FROM_ADDRESS=email@sekolah.sch.id
+
+----------------------------------------------------------
+▶ AKUN LOGIN
+----------------------------------------------------------
+  Kepala Sekolah (Super Admin):
+    ID       : KS001
+    Password : dari SEED_SUPER_ADMIN_PASSWORD (.env) di production,
+               atau KS001 hanya untuk development lokal
+
+  TU / Admin:
+    ID       : ADMIN01
+    Password : dari SEED_ADMIN_PASSWORD (.env) di production,
+               atau ADMIN01 hanya untuk development lokal
+
+  Guru:
+    ID       : Huruf ID masing-masing (A, B, C, ... Y, L1-L5)
+    Password : Sama dengan ID  ← MINTA GURU GANTI SENDIRI
+
+----------------------------------------------------------
+▶ DAFTAR GURU & ID LOGIN
+----------------------------------------------------------
+  A  → Fitriani Shofwa, S.Pd.
+  B  → Sopandi, S.T.
+  C  → Qurrata A'ayuni, M.Si.
+  D  → Shofian, S.Kom.
+  E  → Muhammad Idris, S.Ag.
+  F  → Hasbullah, S.Ag.
+  G  → A. Nurul Fahmi, S.Th.I.
+  H  → Dra. Evi Eritawati Umar
+  I  → Husniati, S.Pd.
+  J  → Nurfajriyani, S.Pd.
+  K  → Dati Hidayati, M.Pd.
+  L  → Laila Kholida, M.Ag.
+  M  → Fathiyatul Makiyah, S.Th.I.
+  N  → Siti Hasanah, S.Pd.
+  O  → Uswatun Aulia, S.Pd.
+  P  → Muzayyin Lidnillah Mara, S.Pd.
+  Q  → M. Nurfuadi, S.Pd.
+  R  → Wahdiatu Syamsiah, M.Pd.
+  S  → Hafiz Liridho, S.E.
+  T  → Farhatul Qolbaini, S.Pd.
+  U  → Ali Syaroni
+  V  → Nurul Huda, S.Ag.
+  W  → Ahmad Mun'im Sidik
+  X  → Wildan
+  Y  → Babay Suhaeni
+  L1 → Munasik Nasal (Literasi)
+  L2 → Badru Tamam (Literasi)
+  L3 → Fatma Aini (Literasi)
+  L4 → Fauzan (Literasi)
+  L5 → Ahmad Luthfi (Literasi)
+
+----------------------------------------------------------
+▶ CRON JOB — Auto-Alpha (Wajib di Hosting)
+----------------------------------------------------------
+  Tambahkan ke cPanel → Cron Jobs:
+  * * * * * php /path/ke/project/artisan schedule:run >> /dev/null 2>&1
+
+  Ini menjalankan penanda Alpha otomatis setiap 5 menit.
+  Tanpa cron job, guru tidak akan otomatis ditandai Alpha.
+
+----------------------------------------------------------
+▶ PERUBAHAN & PERBAIKAN YANG SUDAH DILAKUKAN
+----------------------------------------------------------
+  KRITIS:
+  [✓] API Fingerprint sekarang wajib X-Api-Key header/parameter
+  [✓] File session bocor dihapus dari project
+  [✓] APP_KEY dikosongkan di .env (wajib generate ulang di server)
+  [✓] .gitignore dikonfigurasi agar sessions/* tidak ikut commit/ZIP
+
+  BUG:
+  [✓] N+1 query dashboard (21+ query) → diganti 1 query groupBy
+  [✓] Migration renameColumn kompatibel MySQL 5.7 (pakai DB::statement)
+  [✓] Index database ditambahkan: presensis.tanggal, presensis(tanggal,status),
+      gurus.barcode, gurus.id_fingerprint
+
+  KEAMANAN:
+  [✓] HTTP Security Headers di public/.htaccess:
+      X-Frame-Options, X-Content-Type-Options, X-XSS-Protection,
+      Referrer-Policy, Content-Security-Policy
+  [✓] Upload bukti izin/sakit: validasi mimes + max size sudah ada
+  [✓] Rate limiting: login (10x/menit), barcode (30x/menit)
+
+  PERFORMA:
+  [✓] Google Fonts Inter dimuat async (non-blocking preload)
+  [✓] Database indexes (lihat di atas)
+
+  SEO:
+  [✓] Meta robots noindex/nofollow (sistem internal, tidak perlu index)
+  [✓] Meta description dan theme-color ditambahkan
+
+----------------------------------------------------------
+▶ PERINTAH ARTISAN BERGUNA
+----------------------------------------------------------
+  # Jalankan Auto-Alpha manual
+  php artisan presensi:auto-alpha
+
+  # Lihat semua route
+  php artisan route:list
+
+  # Clear semua cache
+  php artisan config:clear && php artisan cache:clear && php artisan view:clear
+
+  # Test kirim email
+  php artisan tinker
+  > Mail::raw('Test', fn($m) => $m->to('admin@test.com')->subject('Test'));
+
+==========================================================

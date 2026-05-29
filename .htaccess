@@ -1,0 +1,18 @@
+Options -Indexes
+
+# Blokir akses ke folder dan file sensitif
+<FilesMatch "^\.env">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Blokir akses ke folder sensitif
+    RewriteRule ^(app|config|database|vendor|artisan|bootstrap|resources|routes|storage/app|storage/framework|storage/logs)(/.*)? - [F,L]
+
+    # Redirect semua request ke /public/ kecuali yang sudah ada
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ /public/$1 [L,R=301]
+</IfModule>

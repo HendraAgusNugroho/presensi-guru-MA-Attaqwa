@@ -1,0 +1,68 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# ─── HTTP Security Headers ────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    # Cegah halaman dimuat dalam iframe (clickjacking)
+    Header always set X-Frame-Options "SAMEORIGIN"
+
+    # Cegah browser menebak MIME type (MIME sniffing)
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Proteksi XSS bawaan browser lama
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # Batasi informasi Referrer yang dikirim ke situs lain
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # HSTS hanya pada koneksi HTTPS (aman diaktifkan setelah SSL terpasang)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
+
+    # Batasi kemampuan browser (default aman)
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+    # Content Security Policy dasar — sesuaikan jika pakai CDN lain
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; img-src 'self' data: blob:; connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com;"
+
+    # Hapus header yang membocorkan versi server
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>
+
+# ─── Cache Header + Compression (Performance) ─────────────────────────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 hour"
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType text/javascript "access plus 7 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+    ExpiresByType font/woff2 "access plus 30 days"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE text/javascript application/javascript application/x-javascript
+    AddOutputFilterByType DEFLATE application/json application/xml
+</IfModule>
