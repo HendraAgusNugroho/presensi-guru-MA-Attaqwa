@@ -2,7 +2,7 @@
 # Docs: https://docs.railway.com/reference/config-as-code
 
 [build]
-builder = "NIXPACKS"
+builder = "RAILPACK"
 buildCommand = "composer install --no-dev --optimize-autoloader --no-interaction"
 
 [deploy]
