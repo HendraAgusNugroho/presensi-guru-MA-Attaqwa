@@ -24,9 +24,11 @@ if [ -z "${MYSQLHOST:-}" ]; then
 fi
 
 echo "==> DB host: ${MYSQLHOST}"
+
+mkdir -p storage/framework/{sessions,views,cache/data} storage/logs bootstrap/cache
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+
 php artisan config:clear 2>/dev/null || true
-php artisan cache:clear 2>/dev/null || true
-php artisan view:clear 2>/dev/null || true
 rm -f bootstrap/cache/config.php 2>/dev/null || true
 
 echo "==> Menjalankan migrate..."
