@@ -244,6 +244,30 @@ tr:hover td { background: hsl(145,60%,98%); }
 tr.tr-virtual td { background: #fafafa; }
 tr.tr-virtual { opacity: .88; }
 
+/* Halaman presensi — kompak di layar lebar (lokal & deploy sama) */
+.filter-form--presensi {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+    justify-content: flex-start;
+}
+.filter-form--presensi .filter-field {
+    margin: 0;
+    flex: 0 1 auto;
+    min-width: 140px;
+    max-width: 200px;
+}
+
+.stats-grid--presensi {
+    grid-template-columns: repeat(6, minmax(110px, 190px));
+    justify-content: start;
+    margin-bottom: 18px;
+}
+.stats-grid--presensi .stat-card {
+    width: 100%;
+}
+
 /* ---- BUTTONS ---- */
 .btn {
     display: inline-flex; align-items: center; gap: 6px;
@@ -365,6 +389,8 @@ select.form-control { cursor: pointer; }
     .content-area { padding: 20px; }
 
     .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .stats-grid--presensi { grid-template-columns: repeat(3, minmax(110px, 1fr)); }
+    .filter-form--presensi .filter-field { max-width: none; flex: 1 1 140px; }
     .card-grid-2 { grid-template-columns: 1fr 1fr; }
 }
 
@@ -376,6 +402,8 @@ select.form-control { cursor: pointer; }
     .content-area { padding: 14px; }
 
     .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stats-grid--presensi { grid-template-columns: repeat(2, minmax(110px, 1fr)); }
+    .filter-form--presensi .filter-field { min-width: 100%; max-width: 100%; flex: 1 1 100%; }
     .stat-card { padding: 14px; }
     .stat-value { font-size: 1.6rem; }
 
