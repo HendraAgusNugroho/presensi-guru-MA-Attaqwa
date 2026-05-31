@@ -43,19 +43,25 @@
 
         .login-header {
             background: linear-gradient(135deg, hsl(145,60%,18%), hsl(145,60%,28%));
-            padding: 28px 32px 24px;
+            padding: 28px 32px 40px;
             text-align: center;
             position: relative;
         }
         .login-header::after {
             content: '';
             position: absolute;
-            bottom: -1px;
+            bottom: 0;
             left: 0;
             right: 0;
-            height: 24px;
+            height: 28px;
             background: #fff;
-            border-radius: 24px 24px 0 0;
+            border-radius: 28px 28px 0 0;
+            z-index: 1;
+        }
+        .login-header-inner {
+            position: relative;
+            z-index: 2;
+            padding-bottom: 8px;
         }
         .school-logo-wrap {
             width: 84px; height: 84px;
@@ -63,17 +69,36 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 14px;
+            margin: 0 auto 16px;
             box-shadow: 0 8px 24px rgba(0,0,0,.35);
             overflow: hidden;
             background: #fff;
         }
         .school-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
-        .school-name { color: rgba(255,255,255,.95); font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; line-height: 1.5; }
-        .school-sub { color: rgba(255,255,255,.65); font-size: .72rem; margin-top: 2px; }
+        .school-info {
+            padding: 0 12px 12px;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+        .school-name {
+            color: rgba(255,255,255,.98);
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            line-height: 1.45;
+            word-wrap: break-word;
+        }
+        .school-sub {
+            color: rgba(255,255,255,.82);
+            font-size: .72rem;
+            margin-top: 6px;
+            line-height: 1.55;
+            word-wrap: break-word;
+        }
 
-        .login-body { padding: 28px 32px 32px; }
-        .login-title { font-size: 1.2rem; font-weight: 800; color: #1a2e1a; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+        .login-body { padding: 32px 32px 32px; }
+        .login-title { font-size: 1.2rem; font-weight: 800; color: #1a2e1a; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; text-align: center; }
         .login-sub { font-size: .88rem; color: #5a7a5a; margin-bottom: 24px; }
 
         .login-body label { display: block; font-size: .88rem; font-weight: 700; margin-bottom: 6px; color: #1a2e1a; }
@@ -132,9 +157,34 @@
         .remember input { width: 16px; height: 16px; cursor: pointer; accent-color: hsl(145,60%,28%); }
         .footer-info { text-align: center; margin-top: 18px; font-size: .78rem; color: rgba(255,255,255,.5); }
 
+        @media (max-width: 768px) {
+            body.login-page { padding: 12px; align-items: flex-start; padding-top: max(16px, env(safe-area-inset-top)); }
+            .login-wrap { max-width: 100%; margin-top: 0; }
+            .login-header { padding: 22px 18px 44px; }
+            .login-header::after { height: 32px; border-radius: 32px 32px 0 0; }
+            .school-logo-wrap { width: 76px; height: 76px; margin-bottom: 14px; }
+            .school-info { padding: 0 8px 16px; max-width: 100%; }
+            .school-name { font-size: .74rem; line-height: 1.5; }
+            .school-sub { font-size: .7rem; line-height: 1.6; margin-top: 8px; }
+            .login-body { padding: 24px 20px 28px; }
+            .login-title { font-size: 1.05rem; }
+            .login-sub { font-size: .84rem; margin-bottom: 20px; }
+            .footer-info { font-size: .72rem; margin-top: 14px; padding-bottom: env(safe-area-inset-bottom); }
+        }
+
         @media (max-width: 480px) {
-            .login-body { padding: 20px; }
-            .login-header { padding: 22px 20px 20px; }
+            .login-header { padding: 20px 16px 48px; }
+            .school-logo-wrap { width: 72px; height: 72px; }
+            .login-body { padding: 22px 16px 24px; }
+        }
+
+        /* Tablet / iPad */
+        @media (min-width: 481px) and (max-width: 1024px) {
+            body.login-page { padding: 24px; }
+            .login-wrap { max-width: 420px; }
+            .login-header { padding: 26px 28px 42px; }
+            .school-info { padding-bottom: 14px; }
+            .login-body { padding: 28px 28px 32px; }
         }
     </style>
 </head>
@@ -142,12 +192,16 @@
 <div class="login-wrap">
     <div class="login-card">
         <div class="login-header">
-            <div class="school-logo-wrap">
-                <img src="{{ asset('images/logo-sekolah.png') }}" alt="Logo MA Attaqwa"
-                     width="84" height="84" fetchpriority="high">
+            <div class="login-header-inner">
+                <div class="school-logo-wrap">
+                    <img src="{{ asset('images/logo-sekolah.png') }}" alt="Logo MA Attaqwa"
+                         width="84" height="84" fetchpriority="high">
+                </div>
+                <div class="school-info">
+                    <div class="school-name">YPIA Daarul Mu'min</div>
+                    <div class="school-sub">Madrasah Aliyah Attaqwa Benda Tangerang</div>
+                </div>
             </div>
-            <div class="school-name">YPIA Daarul Mu'min</div>
-            <div class="school-sub">Madrasah Aliyah Attaqwa Benda Tangerang</div>
         </div>
         <div class="login-body">
             <h1 class="login-title">
