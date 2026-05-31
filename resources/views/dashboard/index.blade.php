@@ -14,7 +14,9 @@
     background: linear-gradient(135deg, hsl(145,60%,18%), hsl(145,55%,28%));
     border-radius: 14px; padding: 18px 22px; color: #fff;
     display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 0;
+    height: 100%;
+    min-height: 100%;
 }
 .school-welcome h2 { font-size: 1.15rem; font-weight: 800; margin-bottom: 3px; }
 .school-welcome p  { font-size: .85rem; opacity: .85; }
@@ -22,17 +24,42 @@
     background: rgba(255,255,255,.15); padding: 8px 16px; border-radius: 10px;
     font-size: .85rem; font-weight: 700; text-align: center;
     border: 1px solid rgba(255,255,255,.2); white-space: nowrap;
+    flex-shrink: 0;
 }
 .school-welcome .date-badge .day { font-size: 1.4rem; font-weight: 900; display: block; }
+
+.dashboard-hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+@media (min-width: 900px) {
+    .dashboard-hero {
+        grid-template-columns: 1.15fr 1fr;
+        align-items: stretch;
+    }
+}
 
 .greeting-card {
     border-radius: 14px;
     padding: 16px 20px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    border: 1.5px solid;
+}
+.greeting-card__left {
     display: flex;
     align-items: center;
     gap: 14px;
-    border: 1.5px solid;
+    flex: 1;
+    min-width: 0;
 }
 .greeting-card__icon {
     width: 42px;
@@ -44,24 +71,68 @@
     flex-shrink: 0;
 }
 .greeting-card__icon i { font-size: 1.1rem; }
-.greeting-card__title { font-weight: 800; font-size: .92rem; }
-.greeting-card__sub { font-size: .82rem; color: #475569; margin-top: 2px; }
-.greeting-card--pagi { background: #fffbeb; border-color: #fde68a; }
+.greeting-card__content { flex: 1; min-width: 0; }
+.greeting-card__title { font-weight: 800; font-size: .92rem; line-height: 1.35; }
+.greeting-card__sub { font-size: .82rem; color: #475569; margin-top: 4px; line-height: 1.45; }
+.greeting-card__aside {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.6);
+    border: 1px solid rgba(0,0,0,.06);
+    min-width: 72px;
+}
+.greeting-card__time {
+    font-size: 1.25rem;
+    font-weight: 800;
+    display: block;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+.greeting-card__tz {
+    font-size: .68rem;
+    font-weight: 700;
+    opacity: .75;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+.greeting-card--pagi { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #fde68a; }
 .greeting-card--pagi .greeting-card__icon { background: rgba(217, 119, 6, .12); }
 .greeting-card--pagi .greeting-card__icon i,
-.greeting-card--pagi .greeting-card__title { color: #d97706; }
-.greeting-card--siang { background: #f0f9ff; border-color: #bae6fd; }
+.greeting-card--pagi .greeting-card__title,
+.greeting-card--pagi .greeting-card__time { color: #d97706; }
+.greeting-card--siang { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-color: #bae6fd; }
 .greeting-card--siang .greeting-card__icon { background: rgba(2, 132, 199, .12); }
 .greeting-card--siang .greeting-card__icon i,
-.greeting-card--siang .greeting-card__title { color: #0284c7; }
-.greeting-card--sore { background: #faf5ff; border-color: #ddd6fe; }
+.greeting-card--siang .greeting-card__title,
+.greeting-card--siang .greeting-card__time { color: #0284c7; }
+.greeting-card--sore { background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 100%); border-color: #ddd6fe; }
 .greeting-card--sore .greeting-card__icon { background: rgba(124, 58, 237, .12); }
 .greeting-card--sore .greeting-card__icon i,
-.greeting-card--sore .greeting-card__title { color: #7c3aed; }
-.greeting-card--malam { background: #eff6ff; border-color: #bfdbfe; }
+.greeting-card--sore .greeting-card__title,
+.greeting-card--sore .greeting-card__time { color: #7c3aed; }
+.greeting-card--malam { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #bfdbfe; }
 .greeting-card--malam .greeting-card__icon { background: rgba(30, 64, 175, .12); }
 .greeting-card--malam .greeting-card__icon i,
-.greeting-card--malam .greeting-card__title { color: #1e40af; }
+.greeting-card--malam .greeting-card__title,
+.greeting-card--malam .greeting-card__time { color: #1e40af; }
+
+@media (max-width: 599px) {
+    .greeting-card {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+    .greeting-card__aside {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+    .greeting-card__time { font-size: 1.1rem; }
+}
 </style>
 @endpush
 
@@ -88,13 +159,14 @@
 </div>
 @endif
 
-{{-- Welcome Banner --}}
+{{-- Welcome + Greeting --}}
+<div class="dashboard-hero">
 <div class="school-welcome">
-    <div style="display:flex;align-items:center;gap:16px">
+    <div style="display:flex;align-items:center;gap:16px;flex:1;min-width:0">
         <div style="width:52px;height:52px;background:hsl(48,96%,53%);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.2);">
-            <i class="fas fa-mosque" style="color:hsl(145,60%,18%);font-size:1.2rem"></i>
+            <i class="fas fa-mosque" style="color:hsl(145,60%,18%);font-size:1.2rem" aria-hidden="true"></i>
         </div>
-        <div>
+        <div style="min-width:0">
             <h2>Selamat datang, {{ auth()->user()->name }}!</h2>
             <p>YPIA Daarul Mu'min — Madrasah Aliyah Attaqwa Benda Tangerang</p>
         </div>
@@ -132,13 +204,20 @@
     }
 @endphp
 <div class="greeting-card {{ $greetClass }}">
-    <div class="greeting-card__icon">
-        <i class="fas {{ $greetIcon }}"></i>
+    <div class="greeting-card__left">
+        <div class="greeting-card__icon">
+            <i class="fas {{ $greetIcon }}" aria-hidden="true"></i>
+        </div>
+        <div class="greeting-card__content">
+            <div class="greeting-card__title">{{ $greetText }}, {{ auth()->user()->name }}!</div>
+            <div class="greeting-card__sub">{{ $greetSub }}</div>
+        </div>
     </div>
-    <div>
-        <div class="greeting-card__title">{{ $greetText }}, {{ auth()->user()->name }}!</div>
-        <div class="greeting-card__sub">{{ $greetSub }}</div>
+    <div class="greeting-card__aside" aria-label="Waktu saat ini">
+        <span class="greeting-card__time">{{ now()->format('H:i') }}</span>
+        <span class="greeting-card__tz">WIB</span>
     </div>
+</div>
 </div>
 
 {{-- Stat Cards --}}
