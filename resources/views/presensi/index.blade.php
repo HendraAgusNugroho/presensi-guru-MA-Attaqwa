@@ -14,13 +14,13 @@
 
 <!-- Filter -->
 <div class="card">
-    <form method="GET" class="filter-form filter-form--presensi">
-        <div class="form-group filter-field">
+    <form method="GET" class="filter-form" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+        <div class="form-group" style="margin:0;flex:1;min-width:140px">
             <label>Tanggal</label>
             <input type="date" name="tanggal" class="form-control"
                    value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}">
         </div>
-        <div class="form-group filter-field">
+        <div class="form-group" style="margin:0;flex:1;min-width:140px">
             <label>Guru</label>
             <select name="guru_id" class="form-control">
                 <option value="">Semua Guru</option>
@@ -29,7 +29,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group filter-field">
+        <div class="form-group" style="margin:0;flex:1;min-width:120px">
             <label>Status</label>
             <select name="status" class="form-control">
                 <option value="">Semua</option>
@@ -58,7 +58,7 @@
     $jmlIzin     = $presensis->where('status','izin')->count();
     $jmlSakit    = $presensis->where('status','sakit')->count();
 @endphp
-<div class="stats-grid stats-grid--presensi">
+<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));margin-bottom:18px">
     <div class="stat-card total">
         <div class="stat-icon"><i class="fas fa-users"></i></div>
         <div class="stat-label">Total Guru</div>

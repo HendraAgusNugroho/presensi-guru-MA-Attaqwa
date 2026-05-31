@@ -25,6 +25,8 @@ fi
 
 echo "==> DB host: ${MYSQLHOST}"
 php artisan config:clear 2>/dev/null || true
+php artisan cache:clear 2>/dev/null || true
+php artisan view:clear 2>/dev/null || true
 rm -f bootstrap/cache/config.php 2>/dev/null || true
 
 echo "==> Menjalankan migrate..."
@@ -34,10 +36,7 @@ if [ "${RUN_DB_SEED:-false}" = "true" ]; then
     echo "==> Menjalankan db:seed (RUN_DB_SEED=true)..."
     php artisan db:seed --force
 fi
-mkdir -p storage/framework/sessions
-mkdir -p storage/framework/views
-mkdir -p storage/framework/cache/data
-chmod -R 775 storage
+
 php artisan storage:link 2>/dev/null || true
 
 echo "==> Server pada port ${PORT:-8080}"
