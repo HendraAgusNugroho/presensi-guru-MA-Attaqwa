@@ -8,8 +8,9 @@
     <title>Login — Sistem Presensi Guru MA Attaqwa</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;
@@ -47,13 +48,14 @@
         label{display:block;font-size:.88rem;font-weight:700;margin-bottom:6px;color:#1a2e1a;}
         .form-group{margin-bottom:16px;}
         .input-icon{position:relative;}
-        .input-icon i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#a0b8a0;font-size:.9rem;}
+        .input-icon i.field-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#a0b8a0;font-size:.9rem;pointer-events:none;z-index:1;}
         input[type=text],input[type=password]{
             width:100%;padding:12px 14px 12px 42px;
             border:1.5px solid #d4e8d4;border-radius:10px;
             font-size:.95rem;outline:none;transition:border-color .2s,box-shadow .2s;
             font-family:'Inter',sans-serif;background:#f8fdf8;color:#1a2e1a;
         }
+        input#passInput{padding-right:46px;}
         input[type=text]:focus,input[type=password]:focus{
             border-color:hsl(145,60%,28%);background:#fff;
             box-shadow:0 0 0 3px hsl(145,60%,90%);
@@ -71,10 +73,13 @@
         .remember{display:flex;align-items:center;gap:8px;font-size:.88rem;color:#5a7a5a;cursor:pointer;margin-bottom:4px;}
         .remember input{width:16px!important;padding:0!important;box-shadow:none!important;border:1.5px solid #d4e8d4!important;border-radius:4px!important;cursor:pointer;}
         .toggle-pass-btn{
-            position:absolute;right:10px;top:50%;transform:translateY(-50%);
-            background:none;border:none;cursor:pointer;color:#a0b8a0;
-            padding:6px;line-height:1;font-size:.9rem;
+            position:absolute;right:8px;top:50%;transform:translateY(-50%);
+            background:none;border:none;cursor:pointer;color:#7a947a;
+            width:34px;height:34px;padding:0;line-height:1;font-size:.95rem;
+            display:flex;align-items:center;justify-content:center;
+            border-radius:6px;z-index:2;
         }
+        .toggle-pass-btn:hover{color:hsl(145,60%,28%);background:hsl(145,60%,94%);}
         .toggle-pass-btn:focus-visible{outline:2px solid hsl(145,60%,28%);outline-offset:2px;border-radius:4px;}
 
         .footer-info{text-align:center;margin-top:18px;font-size:.78rem;color:rgba(255,255,255,.5);}
@@ -90,7 +95,8 @@
     <div class="login-card">
         <div class="login-header">
             <div class="school-logo-wrap">
-                <img src="{{ asset('images/logo-sekolah.png') }}" alt="Logo MA Attaqwa" loading="lazy">
+                <img src="{{ asset('images/logo-sekolah.png') }}" alt="Logo MA Attaqwa"
+                     width="84" height="84" fetchpriority="high">
             </div>
             <div class="school-name">YPIA Daarul Mu'min</div>
             <div class="school-sub">Madrasah Aliyah Attaqwa Benda Tangerang</div>
@@ -114,7 +120,7 @@
                 <div class="form-group">
                     <label>ID</label>
                     <div class="input-icon">
-                        <i class="fas fa-id-card"></i>
+                        <i class="fas fa-id-card field-icon"></i>
                         <input type="text" name="id_pengguna" value="{{ old('id_pengguna') }}"
                             placeholder="Masukkan ID Anda" autocomplete="username" required autofocus>
                     </div>
@@ -122,7 +128,7 @@
                 <div class="form-group">
                     <label>Password</label>
                     <div class="input-icon">
-                        <i class="fas fa-lock"></i>
+                        <i class="fas fa-lock field-icon"></i>
                         <input type="password" name="password" placeholder="••••••••"
                             autocomplete="current-password" required id="passInput">
                         <button type="button" id="togglePass" class="toggle-pass-btn"
