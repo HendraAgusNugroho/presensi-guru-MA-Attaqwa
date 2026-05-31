@@ -25,12 +25,15 @@ fi
 
 echo "==> DB host: ${MYSQLHOST}"
 
+# Pastikan direktori storage/bootstrap writable sebelum artisan clear
 mkdir -p storage/framework/{sessions,views,cache/data} storage/logs bootstrap/cache
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
-php artisan config:clear 2>/dev/null || true
-php artisan view:clear 2>/dev/null || true
-rm -f bootstrap/cache/config.php 2>/dev/null || true
+echo "==> Clearing Laravel cache..."
+php artisan view:clear
+php artisan cache:clear
+php artisan config:clear
+php artisan optimize
 
 echo "==> Menjalankan migrate..."
 php artisan migrate --force

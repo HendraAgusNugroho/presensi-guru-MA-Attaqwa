@@ -9,88 +9,132 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ is_file(public_path('css/app.css')) ? substr(md5_file(public_path('css/app.css')), 0, 12) : '1' }}">
     <style>
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;
-            background:linear-gradient(135deg,hsl(145,60%,10%) 0%,hsl(145,60%,18%) 50%,hsl(145,55%,26%) 100%);
-            position:relative;overflow:hidden;}
-        body::before{content:'';position:absolute;width:400px;height:400px;border-radius:50%;
-            background:rgba(255,255,255,.04);top:-120px;right:-100px;}
-        body::after{content:'';position:absolute;width:300px;height:300px;border-radius:50%;
-            background:rgba(255,255,255,.03);bottom:-80px;left:-80px;}
+        body.login-page {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, hsl(145,60%,10%) 0%, hsl(145,60%,18%) 50%, hsl(145,55%,26%) 100%);
+            position: relative;
+            overflow-x: hidden;
+            padding: 16px;
+        }
+        body.login-page::before,
+        body.login-page::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,.04);
+            pointer-events: none;
+        }
+        body.login-page::before { width: 400px; height: 400px; top: -120px; right: -100px; }
+        body.login-page::after { width: 300px; height: 300px; bottom: -80px; left: -80px; background: rgba(255,255,255,.03); }
 
-        .login-wrap{width:100%;max-width:440px;padding:20px;position:relative;z-index:1;}
-        .login-card{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.3);}
+        .login-wrap { width: 100%; max-width: 440px; position: relative; z-index: 1; }
+        .login-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,.3); }
 
-        .login-header{
-            background:linear-gradient(135deg,hsl(145,60%,18%),hsl(145,60%,28%));
-            padding:28px 32px 24px;text-align:center;position:relative;
+        .login-header {
+            background: linear-gradient(135deg, hsl(145,60%,18%), hsl(145,60%,28%));
+            padding: 28px 32px 24px;
+            text-align: center;
+            position: relative;
         }
-        .login-header::after{
-            content:'';position:absolute;bottom:-1px;left:0;right:0;height:24px;
-            background:#fff;border-radius:24px 24px 0 0;
+        .login-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 24px;
+            background: #fff;
+            border-radius: 24px 24px 0 0;
         }
-        .school-logo-wrap{
-            width:84px;height:84px;border-radius:14px;display:flex;align-items:center;justify-content:center;
-            margin:0 auto 14px;box-shadow:0 8px 24px rgba(0,0,0,.35);overflow:hidden;background:#fff;
+        .school-logo-wrap {
+            width: 84px; height: 84px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.35);
+            overflow: hidden;
+            background: #fff;
         }
-        .school-logo-wrap img{width:100%;height:100%;object-fit:contain;}
-        .school-name{color:rgba(255,255,255,.95);font-size:.78rem;font-weight:700;
-            letter-spacing:.04em;text-transform:uppercase;line-height:1.5;}
-        .school-sub{color:rgba(255,255,255,.65);font-size:.72rem;margin-top:2px;}
+        .school-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+        .school-name { color: rgba(255,255,255,.95); font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; line-height: 1.5; }
+        .school-sub { color: rgba(255,255,255,.65); font-size: .72rem; margin-top: 2px; }
 
-        .login-body{padding:28px 32px 32px;}
-        .login-title{font-size:1.2rem;font-weight:800;color:#1a2e1a;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
-        .login-sub{font-size:.88rem;color:#5a7a5a;margin-bottom:24px;}
+        .login-body { padding: 28px 32px 32px; }
+        .login-title { font-size: 1.2rem; font-weight: 800; color: #1a2e1a; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+        .login-sub { font-size: .88rem; color: #5a7a5a; margin-bottom: 24px; }
 
-        label{display:block;font-size:.88rem;font-weight:700;margin-bottom:6px;color:#1a2e1a;}
-        .form-group{margin-bottom:16px;}
-        .input-icon{position:relative;}
-        .input-icon i.field-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#a0b8a0;font-size:.9rem;pointer-events:none;z-index:1;}
-        input[type=text],input[type=password]{
-            width:100%;padding:12px 14px 12px 42px;
-            border:1.5px solid #d4e8d4;border-radius:10px;
-            font-size:.95rem;outline:none;transition:border-color .2s,box-shadow .2s;
-            font-family:'Inter',sans-serif;background:#f8fdf8;color:#1a2e1a;
+        .login-body label { display: block; font-size: .88rem; font-weight: 700; margin-bottom: 6px; color: #1a2e1a; }
+        .login-body .form-group { margin-bottom: 16px; }
+        .login-body .input-icon { position: relative; }
+        .login-body .input-icon .field-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0b8a0;
+            font-size: .9rem;
+            pointer-events: none;
+            z-index: 2;
         }
-        input#passInput{padding-right:46px;}
-        input[type=text]:focus,input[type=password]:focus{
-            border-color:hsl(145,60%,28%);background:#fff;
-            box-shadow:0 0 0 3px hsl(145,60%,90%);
+        .login-body .input-icon .form-control {
+            padding-left: 42px;
+            background: #f8fdf8;
         }
-        .btn-login{
-            width:100%;padding:13px;
-            background:linear-gradient(135deg,hsl(145,60%,28%),hsl(145,60%,20%));
-            color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;
-            transition:all .2s;margin-top:8px;font-family:'Inter',sans-serif;
-            display:flex;align-items:center;justify-content:center;gap:8px;
-        }
-        .btn-login:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,80,0,.3);}
-        .alert-err{background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;
-            padding:10px 14px;margin-bottom:16px;font-size:.88rem;display:flex;align-items:center;gap:8px;}
-        .remember{display:flex;align-items:center;gap:8px;font-size:.88rem;color:#5a7a5a;cursor:pointer;margin-bottom:4px;}
-        .remember input{width:16px!important;padding:0!important;box-shadow:none!important;border:1.5px solid #d4e8d4!important;border-radius:4px!important;cursor:pointer;}
-        .toggle-pass-btn{
-            position:absolute;right:8px;top:50%;transform:translateY(-50%);
-            background:none;border:none;cursor:pointer;color:#7a947a;
-            width:34px;height:34px;padding:0;line-height:1;font-size:.95rem;
-            display:flex;align-items:center;justify-content:center;
-            border-radius:6px;z-index:2;
-        }
-        .toggle-pass-btn:hover{color:hsl(145,60%,28%);background:hsl(145,60%,94%);}
-        .toggle-pass-btn:focus-visible{outline:2px solid hsl(145,60%,28%);outline-offset:2px;border-radius:4px;}
+        .login-body .password-field .form-control { padding-left: 42px; background: #f8fdf8; }
 
-        .footer-info{text-align:center;margin-top:18px;font-size:.78rem;color:rgba(255,255,255,.5);}
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, hsl(145,60%,28%), hsl(145,60%,20%));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            margin-top: 8px;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+        }
+        .btn-login:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,80,0,.3); }
 
-        @media(max-width:480px){
-            .login-body{padding:20px;}
-            .login-header{padding:22px 20px 20px;}
+        .alert-err {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            font-size: .88rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .remember { display: flex; align-items: center; gap: 8px; font-size: .88rem; color: #5a7a5a; cursor: pointer; margin-bottom: 4px; }
+        .remember input { width: 16px; height: 16px; cursor: pointer; accent-color: hsl(145,60%,28%); }
+        .footer-info { text-align: center; margin-top: 18px; font-size: .78rem; color: rgba(255,255,255,.5); }
+
+        @media (max-width: 480px) {
+            .login-body { padding: 20px; }
+            .login-header { padding: 22px 20px 20px; }
         }
     </style>
 </head>
-<body>
+<body class="login-page">
 <div class="login-wrap">
     <div class="login-card">
         <div class="login-header">
@@ -102,15 +146,15 @@
             <div class="school-sub">Madrasah Aliyah Attaqwa Benda Tangerang</div>
         </div>
         <div class="login-body">
-            <div class="login-title">
-                <i class="fas fa-fingerprint" style="color:hsl(145,60%,28%)"></i>
+            <h1 class="login-title">
+                <i class="fas fa-fingerprint" style="color:hsl(145,60%,28%)" aria-hidden="true"></i>
                 Sistem Presensi Guru
-            </div>
-            <div class="login-sub">Masuk menggunakan ID dan password Anda</div>
+            </h1>
+            <p class="login-sub">Masuk menggunakan ID dan password Anda</p>
 
             @if($errors->any())
-                <div class="alert-err">
-                    <i class="fas fa-times-circle"></i>
+                <div class="alert-err" role="alert">
+                    <i class="fas fa-times-circle" aria-hidden="true"></i>
                     {{ $errors->first() }}
                 </div>
             @endif
@@ -118,56 +162,46 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="form-group">
-                    <label>ID</label>
+                    <label for="id_pengguna">ID</label>
                     <div class="input-icon">
-                        <i class="fas fa-id-card field-icon"></i>
-                        <input type="text" name="id_pengguna" value="{{ old('id_pengguna') }}"
+                        <i class="fas fa-id-card field-icon" aria-hidden="true"></i>
+                        <input type="text" name="id_pengguna" id="id_pengguna"
+                            class="form-control" value="{{ old('id_pengguna') }}"
                             placeholder="Masukkan ID Anda" autocomplete="username" required autofocus>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
-                    <div class="input-icon">
-                        <i class="fas fa-lock field-icon"></i>
-                        <input type="password" name="password" placeholder="••••••••"
-                            autocomplete="current-password" required id="passInput">
-                        <button type="button" id="togglePass" class="toggle-pass-btn"
-                                aria-label="Tampilkan password" aria-pressed="false"
-                                onclick="togglePass()">
-                            <i class="fas fa-eye" aria-hidden="true"></i>
+                    <label for="passInput">Password</label>
+                    <div class="password-field input-icon">
+                        <i class="fas fa-lock field-icon" aria-hidden="true"></i>
+                        <input type="password" name="password" id="passInput" class="form-control"
+                            placeholder="Masukkan password" autocomplete="current-password" required>
+                        <button type="button" class="password-toggle" data-toggle-password="passInput"
+                            aria-label="Tampilkan password" aria-pressed="false">
+                            <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                                <line x1="1" y1="1" x2="23" y2="23"/>
+                            </svg>
                         </button>
                     </div>
                 </div>
-                <label class="remember">
-                    <input type="checkbox" name="remember"> Ingat saya
+                <label class="remember" for="remember_me">
+                    <input type="checkbox" name="remember" id="remember_me" value="1"> Ingat saya
                 </label>
-                <button type="submit" class="btn-login" style="margin-top:16px">
-                    <i class="fas fa-right-to-bracket"></i> Masuk ke Sistem
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-right-to-bracket" aria-hidden="true"></i> Masuk ke Sistem
                 </button>
             </form>
         </div>
     </div>
-    <div class="footer-info">
-        &copy; {{ date('Y') }} MA Attaqwa — YPIA Daarul Mu'min &nbsp;|&nbsp; Sistem Presensi Guru
-    </div>
+    <p class="footer-info">
+        &copy; {{ date('Y') }} MA Attaqwa — YPIA Daarul Mu'min | Sistem Presensi Guru
+    </p>
 </div>
-<script>
-function togglePass(){
-    var i=document.getElementById('passInput');
-    var btn=document.getElementById('togglePass');
-    var ic=btn.querySelector('i');
-    if(i.type==='password'){
-        i.type='text';
-        ic.className='fas fa-eye-slash';
-        btn.setAttribute('aria-label','Sembunyikan password');
-        btn.setAttribute('aria-pressed','true');
-    }else{
-        i.type='password';
-        ic.className='fas fa-eye';
-        btn.setAttribute('aria-label','Tampilkan password');
-        btn.setAttribute('aria-pressed','false');
-    }
-}
-</script>
+<script src="{{ asset('js/app.js') }}?v={{ is_file(public_path('js/app.js')) ? substr(md5_file(public_path('js/app.js')), 0, 12) : '1' }}"></script>
 </body>
 </html>

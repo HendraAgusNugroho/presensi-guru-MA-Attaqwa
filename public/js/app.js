@@ -1,25 +1,33 @@
-// Presensi Guru — At-Taqwa
-// Global helpers
+(function () {
+    function togglePassword(btn) {
+        var inputId = btn.getAttribute('data-toggle-password');
+        if (!inputId) return;
+        var input = document.getElementById(inputId);
+        if (!input) return;
 
-// Auto-dismiss alerts after 5 seconds
-document.addEventListener('DOMContentLoaded', function () {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            alert.style.opacity = '0';
-            alert.style.transition = 'opacity .5s';
-            setTimeout(() => alert.remove(), 500);
-        }, 5000);
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+        btn.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
+        btn.classList.toggle('is-visible', show);
+    }
+
+    function bindPasswordToggles(root) {
+        (root || document).querySelectorAll('[data-toggle-password]').forEach(function (btn) {
+            if (btn.dataset.bound === '1') return;
+            btn.dataset.bound = '1';
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                togglePassword(btn);
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        bindPasswordToggles(document);
     });
 
-    // Update jam di topbar setiap menit
-    const jamEl = document.querySelector('.topbar-right span:last-child');
-    if (jamEl) {
-        setInterval(() => {
-            const now = new Date();
-            const jam = now.getHours().toString().padStart(2,'0')
-                      + ':' + now.getMinutes().toString().padStart(2,'0');
-            jamEl.textContent = jam;
-        }, 30000);
-    }
-});
+    window.bindPasswordToggles = bindPasswordToggles;
+})();

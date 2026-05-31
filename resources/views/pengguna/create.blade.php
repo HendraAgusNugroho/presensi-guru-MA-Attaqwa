@@ -64,17 +64,9 @@
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-group">
-                    <label>Password <span style="color:red">*</span></label>
-                    <input type="password" name="password" class="form-control"
-                           placeholder="Min. 6 karakter" required>
-                    @error('password')<div style="color:#dc2626;font-size:.8rem;margin-top:4px">{{ $message }}</div>@enderror
-                </div>
-                <div class="form-group">
-                    <label>Konfirmasi Password <span style="color:red">*</span></label>
-                    <input type="password" name="password_confirmation" class="form-control"
-                           placeholder="Ulangi password" required>
-                </div>
+                <x-password-input name="password" id="password" label="Password" :required="true" placeholder="Min. 6 karakter" autocomplete="new-password" />
+                @error('password')<div role="alert" style="color:#dc2626;font-size:.8rem;margin-top:4px">{{ $message }}</div>@enderror
+                <x-password-input name="password_confirmation" id="password_confirmation" label="Konfirmasi Password" :required="true" placeholder="Ulangi password" autocomplete="new-password" />
             </div>
         </div>
 

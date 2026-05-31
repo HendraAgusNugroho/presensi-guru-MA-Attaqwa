@@ -60,15 +60,15 @@ git push -u origin main
 3. Klik **+ New Variable** → **Add Variable Reference** (atau **Connect** dari MySQL)
 4. Pilih service **MySQL** dan tambahkan referensi:
 
-| Variable di service Web | Referensi |
-|-------------------------|-----------|
-| `MYSQLHOST` | MySQL → MYSQLHOST |
-| `MYSQLPORT` | MySQL → MYSQLPORT |
-| `MYSQLUSER` | MySQL → MYSQLUSER |
-| `MYSQLPASSWORD` | MySQL → MYSQLPASSWORD |
-| `MYSQLDATABASE` | MySQL → MYSQLDATABASE |
+| Variable di service Web | Referensi             |
+| ----------------------- | --------------------- |
+| `MYSQLHOST`             | MySQL → MYSQLHOST     |
+| `MYSQLPORT`             | MySQL → MYSQLPORT     |
+| `MYSQLUSER`             | MySQL → MYSQLUSER     |
+| `MYSQLPASSWORD`         | MySQL → MYSQLPASSWORD |
+| `MYSQLDATABASE`         | MySQL → MYSQLDATABASE |
 
-*(Railway bisa menambahkan ini otomatis saat "Connect" database ke service.)*
+_(Railway bisa menambahkan ini otomatis saat "Connect" database ke service.)_
 
 ---
 
@@ -76,22 +76,22 @@ git push -u origin main
 
 Di tab **Variables** service web, tambahkan:
 
-| Variable | Nilai |
-|----------|--------|
-| `APP_NAME` | `Presensi Guru At-Taqwa` |
-| `APP_ENV` | `production` |
-| `APP_DEBUG` | `false` |
-| `APP_KEY` | *(lihat langkah 5b)* |
-| `APP_URL` | *(lihat langkah 6 — URL Railway)* |
-| `DB_CONNECTION` | `mysql` |
-| `SESSION_DRIVER` | `file` |
-| `SESSION_SECURE_COOKIE` | `true` |
-| `CACHE_DRIVER` | `file` |
-| `MAIL_MAILER` | `log` |
-| `FINGERPRINT_API_KEY` | *(32+ karakter acak)* |
-| `SEED_SUPER_ADMIN_PASSWORD` | `DemoKS2026!` |
-| `SEED_ADMIN_PASSWORD` | `DemoAdmin2026!` |
-| `RUN_DB_SEED` | `true` *(hanya deploy pertama)* |
+| Variable                    | Nilai                             |
+| --------------------------- | --------------------------------- |
+| `APP_NAME`                  | `Presensi Guru At-Taqwa`          |
+| `APP_ENV`                   | `production`                      |
+| `APP_DEBUG`                 | `false`                           |
+| `APP_KEY`                   | _(lihat langkah 5b)_              |
+| `APP_URL`                   | _(lihat langkah 6 — URL Railway)_ |
+| `DB_CONNECTION`             | `mysql`                           |
+| `SESSION_DRIVER`            | `file`                            |
+| `SESSION_SECURE_COOKIE`     | `true`                            |
+| `CACHE_DRIVER`              | `file`                            |
+| `MAIL_MAILER`               | `log`                             |
+| `FINGERPRINT_API_KEY`       | _(32+ karakter acak)_             |
+| `SEED_SUPER_ADMIN_PASSWORD` | `DemoKS2026!`                     |
+| `SEED_ADMIN_PASSWORD`       | `DemoAdmin2026!`                  |
+| `RUN_DB_SEED`               | `true` _(hanya deploy pertama)_   |
 
 #### Langkah 5b: Generate APP_KEY
 
@@ -137,11 +137,11 @@ Salin ke **`FINGERPRINT_API_KEY`**.
 
 Buka `APP_URL` di browser → `/login`
 
-| Role | ID | Password (jika pakai seed di atas) |
-|------|-----|-------------------------------------|
-| Super Admin | `KS001` | `DemoKS2026!` |
-| Admin | `ADMIN01` | `DemoAdmin2026!` |
-| Guru | `A`, `B`, `C`, … | Sama dengan ID guru |
+| Role        | ID               | Password (jika pakai seed di atas) |
+| ----------- | ---------------- | ---------------------------------- |
+| Super Admin | `KS001`          | `DemoKS2026!`                      |
+| Admin       | `ADMIN01`        | `DemoAdmin2026!`                   |
+| Guru        | `A`, `B`, `C`, … | Sama dengan ID guru                |
 
 > Setelah login pertama, ganti password lewat menu **Profil**.
 
@@ -194,12 +194,12 @@ railway domain
 
 ## File khusus Railway di project ini
 
-| File | Fungsi |
-|------|--------|
-| `railway.toml` | Perintah build & start |
-| `nixpacks.toml` | PHP 8.2 + ekstensi MySQL |
+| File                       | Fungsi                               |
+| -------------------------- | ------------------------------------ |
+| `railway.toml`             | Perintah build & start               |
+| `nixpacks.toml`            | PHP 8.2 + ekstensi MySQL             |
 | `scripts/railway-start.sh` | Migrate + serve saat container jalan |
-| `AppServiceProvider` | Map `MYSQLHOST` dll. ke Laravel |
+| `AppServiceProvider`       | Map `MYSQLHOST` dll. ke Laravel      |
 
 ---
 
@@ -215,15 +215,18 @@ railway domain
 
 ## Troubleshooting Railway
 
-| Masalah | Solusi |
-|---------|--------|
-| **Build gagal** | Cek log build; pastikan `composer.lock` ada di repo |
-| **500 / APP_KEY** | Set `APP_KEY` di Variables |
-| **SQL connection refused** | Pastikan MySQL sudah di-**connect** ke service web; cek `MYSQLHOST` |
-| **Login redirect loop** | `APP_URL` harus sama persis dengan domain Railway (https) |
-| **CSS/JS tidak load** | Pastikan `APP_URL` benar; clear cache: Redeploy |
-| **Grafik kosong** | Buka DevTools → Console; cek CSP (harusnya OK) |
-| **Foto guru hilang** | Normal di Railway demo — disk ephemeral |
+| Masalah                                         | Solusi                                                                                                                                                        |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Build gagal**                                 | Cek log build; pastikan `composer.lock` ada di repo                                                                                                           |
+| **Build gagal: `attribute 'composer' missing`** | Di `nixpacks.toml` pakai `php82Packages.composer`, bukan `php82Extensions.composer`                                                                           |
+| **Build gagal: `ext-gd` missing**               | Pastikan `ext-gd` ada di `composer.json`; jangan override `nixPkgs` manual di `nixpacks.toml`                                                                 |
+| **Status CRASHED** (bukan gagal build)          | Build sudah OK; container mati saat jalan. Buka tab **Logs** (bukan Build Logs). Biasanya: `APP_KEY` kosong, MySQL belum di-**Connect**, atau `migrate` gagal |
+| **500 / APP_KEY**                               | Set `APP_KEY` di Variables                                                                                                                                    |
+| **SQL connection refused**                      | Pastikan MySQL sudah di-**connect** ke service web; cek `MYSQLHOST`                                                                                           |
+| **Login redirect loop**                         | `APP_URL` harus sama persis dengan domain Railway (https)                                                                                                     |
+| **CSS/JS tidak load**                           | Pastikan `APP_URL` benar; clear cache: Redeploy                                                                                                               |
+| **Grafik kosong**                               | Buka DevTools → Console; cek CSP (harusnya OK)                                                                                                                |
+| **Foto guru hilang**                            | Normal di Railway demo — disk ephemeral                                                                                                                       |
 
 ### Lihat log
 
@@ -245,12 +248,12 @@ Atau di dashboard → service → **Logs**.
 
 ## Perbandingan singkat
 
-| | Railway | cPanel/VPS |
-|--|---------|------------|
-| Cocok untuk | Demo, uji coba cepat | Production sekolah |
-| Setup | Mudah (klik) | Manual, lebih kontrol |
-| Upload foto | Tidak permanen | Permanen |
-| MySQL | Plugin Railway | Sendiri |
+|             | Railway              | cPanel/VPS            |
+| ----------- | -------------------- | --------------------- |
+| Cocok untuk | Demo, uji coba cepat | Production sekolah    |
+| Setup       | Mudah (klik)         | Manual, lebih kontrol |
+| Upload foto | Tidak permanen       | Permanen              |
+| MySQL       | Plugin Railway       | Sendiri               |
 
 ---
 

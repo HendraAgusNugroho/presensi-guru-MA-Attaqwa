@@ -163,20 +163,12 @@
     <form method="POST" action="{{ route('pengguna.reset_password', $pengguna) }}">
         @csrf
         <div class="form-row" style="margin-bottom:12px">
-            <div class="form-group" style="margin-bottom:0">
-                <label style="font-size:.85rem">Password Baru <span style="color:red">*</span></label>
-                <input type="password" name="password" class="form-control"
-                       placeholder="Min. 6 karakter" required>
-                @error('password')<div style="color:#dc2626;font-size:.8rem;margin-top:4px">{{ $message }}</div>@enderror
-            </div>
-            <div class="form-group" style="margin-bottom:0">
-                <label style="font-size:.85rem">Konfirmasi Password <span style="color:red">*</span></label>
-                <input type="password" name="password_confirmation" class="form-control"
-                       placeholder="Ulangi password" required>
-            </div>
+            <x-password-input name="password" id="reset_password" label="Password Baru" :required="true" placeholder="Min. 6 karakter" autocomplete="new-password" />
+            @error('password')<div role="alert" style="color:#dc2626;font-size:.8rem;margin-top:4px">{{ $message }}</div>@enderror
+            <x-password-input name="password_confirmation" id="reset_password_confirm" label="Konfirmasi Password" :required="true" placeholder="Ulangi password" autocomplete="new-password" />
         </div>
         <button type="submit" class="btn btn-danger btn-sm"
-                onclick="return confirm('Reset password pengguna {{ $pengguna->name }}?')">
+                data-confirm="Reset password pengguna {{ $pengguna->name }}?">
             <i class="fas fa-key"></i> Reset Password
         </button>
     </form>

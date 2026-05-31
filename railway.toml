@@ -2,10 +2,11 @@
 # Docs: https://docs.railway.com/reference/config-as-code
 
 [build]
-builder = "RAILPACK"
-buildCommand = "composer install --no-dev --optimize-autoloader --no-interaction"
+builder = "NIXPACKS"
+# composer install dijalankan Nixpacks (PHP + ext-gd dari composer.json)
 
 [deploy]
-startCommand = "bash scripts/railway-start.sh"
+# Urutan: siapkan storage → clear cache Laravel → jalankan server (via railway-start.sh)
+startCommand = "mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data storage/logs bootstrap/cache && php artisan view:clear && php artisan cache:clear && php artisan config:clear && php artisan optimize && bash scripts/railway-start.sh"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3

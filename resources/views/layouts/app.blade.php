@@ -16,11 +16,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     @php
         $cssPath = public_path('css/app.css');
         $cssVer = (is_file($cssPath) && is_readable($cssPath)) ? substr(md5_file($cssPath), 0, 12) : '1';
+        $jsPath = public_path('js/app.js');
+        $jsVer = (is_file($jsPath) && is_readable($jsPath)) ? substr(md5_file($jsPath), 0, 12) : '1';
     @endphp
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ $cssVer }}">
     @stack('styles')
@@ -35,10 +36,13 @@
 </div>
 
 <!-- Overlay (mobile) -->
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="overlay" id="overlay" onclick="closeSidebar()" aria-hidden="true" hidden></div>
 
 <!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar" aria-label="Navigasi utama">
+    <button type="button" class="sidebar-close" onclick="closeSidebar()" aria-label="Tutup menu">
+        <i class="fas fa-xmark" aria-hidden="true"></i>
+    </button>
     <!-- Brand / Logo -->
     <div class="sidebar-brand" style="padding:14px 14px 10px;">
         <div style="display:flex;align-items:center;gap:10px;">
@@ -91,7 +95,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav" aria-label="Menu utama">
 
         @if(auth()->user()->isGuru())
             <div class="nav-section">Presensi Saya</div>
@@ -112,7 +116,8 @@
         @if(auth()->user()->isStaff())
             <div class="nav-section">Utama</div>
             <a href="{{ route('dashboard') }}"
-               class="nav-link @if(request()->routeIs('dashboard')) active @endif">
+               class="nav-link @if(request()->routeIs('dashboard')) active @endif"
+               @if(request()->routeIs('dashboard')) aria-current="page" @endif>
                 <i class="fas fa-chart-line"></i> Dashboard
             </a>
 
@@ -123,7 +128,8 @@
                 <i class="fas fa-qrcode"></i> Scan QR Code
             </a>
             <a href="{{ route('presensi.index') }}"
-               class="nav-link @if(request()->routeIs('presensi.index')) active @endif">
+               class="nav-link @if(request()->routeIs('presensi.index')) active @endif"
+               @if(request()->routeIs('presensi.index')) aria-current="page" @endif>
                 <i class="fas fa-list-check"></i> Data Presensi
             </a>
 
@@ -167,12 +173,13 @@
     <!-- Bottom actions -->
     <div style="padding:12px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0;">
         <a href="{{ route('profil.index') }}"
-           style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.8);
+           aria-label="Profil dan ubah password"
+           style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.9);
                   padding:9px 12px;border-radius:8px;font-size:.82rem;margin-bottom:8px;text-decoration:none;
                   transition:background .2s;"
            onmouseover="this.style.background='rgba(255,255,255,.12)'"
            onmouseout="this.style.background='rgba(255,255,255,.07)'">
-            <i class="fas fa-gear"></i> Profil &amp; Password
+            <i class="fas fa-gear" aria-hidden="true"></i> Profil &amp; Password
         </a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
@@ -188,7 +195,8 @@
     <!-- Topbar -->
     <div class="topbar">
         <div style="display:flex;align-items:center;gap:12px;">
-            <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
+            <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()"
+                    aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="sidebar">
                 <span></span><span></span><span></span>
             </button>
             <span class="topbar-title">@yield('title', 'Dashboard')</span>
@@ -355,12 +363,20 @@ function toggleSidebar() {
     if (isOpen) {
         sidebar.classList.remove('open');
         overlay.classList.remove('show');
+        overlay.setAttribute('hidden', '');
+        overlay.setAttribute('aria-hidden', 'true');
         btn.classList.remove('active');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-label', 'Buka menu navigasi');
         document.body.style.overflow = '';
     } else {
         sidebar.classList.add('open');
         overlay.classList.add('show');
+        overlay.removeAttribute('hidden');
+        overlay.setAttribute('aria-hidden', 'false');
         btn.classList.add('active');
+        btn.setAttribute('aria-expanded', 'true');
+        btn.setAttribute('aria-label', 'Tutup menu navigasi');
         document.body.style.overflow = 'hidden';
     }
 }
@@ -371,7 +387,13 @@ function closeSidebar() {
     var btn     = document.getElementById('hamburger-btn');
     sidebar.classList.remove('open');
     overlay.classList.remove('show');
+    overlay.setAttribute('hidden', '');
+    overlay.setAttribute('aria-hidden', 'true');
     btn.classList.remove('active');
+    if (btn) {
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-label', 'Buka menu navigasi');
+    }
     document.body.style.overflow = '';
 }
 
@@ -381,5 +403,14 @@ window.addEventListener('resize', function(){
 });
 </script>
 @stack('scripts')
+<script src="{{ asset('js/app.js') }}?v={{ $jsVer }}"></script>
+<script>
+document.querySelectorAll('[data-confirm]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+        var msg = btn.getAttribute('data-confirm');
+        if (msg && !confirm(msg)) e.preventDefault();
+    });
+});
+</script>
 </body>
 </html>
