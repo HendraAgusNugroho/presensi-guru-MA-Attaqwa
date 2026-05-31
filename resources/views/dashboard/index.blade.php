@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title','Dashboard')
+@section('meta_description', 'Dashboard presensi guru MA Attaqwa — ringkasan kehadiran, statistik, dan scan terbaru hari ini.')
 
 @push('styles')
 <style>

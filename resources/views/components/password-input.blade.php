@@ -18,7 +18,7 @@
             type="password"
             name="{{ $name }}"
             id="{{ $inputId }}"
-            class="form-control"
+            class="form-control @error($name) is-invalid @enderror"
             @if($required) required @endif
             @if($placeholder) placeholder="{{ $placeholder }}" @endif
             @if($autocomplete) autocomplete="{{ $autocomplete }}" @endif
@@ -41,4 +41,7 @@
             </svg>
         </button>
     </div>
+    @error($name)
+        <div class="field-error" role="alert">{{ $message }}</div>
+    @enderror
 </div>

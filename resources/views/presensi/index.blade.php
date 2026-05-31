@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title','Data Presensi')
+@section('meta_description', 'Rekap dan kelola presensi guru MA Attaqwa — filter berdasarkan tanggal, guru, dan status kehadiran.')
 
 @section('content')
 <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
@@ -14,15 +15,15 @@
 
 <!-- Filter -->
 <div class="card">
-    <form method="GET" class="filter-form" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+    <form method="GET" class="filter-form" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end" aria-label="Filter data presensi">
         <div class="form-group" style="margin:0;flex:1;min-width:140px">
-            <label>Tanggal</label>
-            <input type="date" name="tanggal" class="form-control"
+            <label for="filter-tanggal">Tanggal</label>
+            <input type="date" name="tanggal" id="filter-tanggal" class="form-control"
                    value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}">
         </div>
         <div class="form-group" style="margin:0;flex:1;min-width:140px">
-            <label>Guru</label>
-            <select name="guru_id" class="form-control">
+            <label for="filter-guru">Guru</label>
+            <select name="guru_id" id="filter-guru" class="form-control">
                 <option value="">Semua Guru</option>
                 @foreach($gurus as $g)
                     <option value="{{ $g->id }}" @selected(request('guru_id') == $g->id)>{{ $g->nama }}</option>
@@ -30,8 +31,8 @@
             </select>
         </div>
         <div class="form-group" style="margin:0;flex:1;min-width:120px">
-            <label>Status</label>
-            <select name="status" class="form-control">
+            <label for="filter-status">Status</label>
+            <select name="status" id="filter-status" class="form-control">
                 <option value="">Semua</option>
                 <option value="hadir"        @selected(request('status')=='hadir')>Hadir</option>
                 <option value="telat"        @selected(request('status')=='telat')>Telat</option>
@@ -41,10 +42,10 @@
             </select>
         </div>
         <button type="submit" class="btn btn-primary" style="height:42px">
-            <i class="fas fa-search"></i> Filter
+            <i class="fas fa-search" aria-hidden="true"></i> Filter
         </button>
         <a href="{{ route('presensi.index') }}" class="btn btn-secondary" style="height:42px">
-            <i class="fas fa-refresh"></i> Reset
+            <i class="fas fa-refresh" aria-hidden="true"></i> Reset
         </a>
     </form>
 </div>
@@ -58,7 +59,7 @@
     $jmlIzin     = $presensis->where('status','izin')->count();
     $jmlSakit    = $presensis->where('status','sakit')->count();
 @endphp
-<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));margin-bottom:18px">
+<div class="stats-grid stats-grid--presensi" style="margin-bottom:18px">
     <div class="stat-card total">
         <div class="stat-icon"><i class="fas fa-users"></i></div>
         <div class="stat-label">Total Guru</div>
@@ -162,12 +163,12 @@
         <table>
             <thead>
                 <tr>
-                    <th>Guru</th>
-                    <th>Tanggal</th>
-                    <th>Status</th>
-                    <th>Keterangan</th>
-                    <th>Bukti</th>
-                    <th>Aksi Persetujuan</th>
+                    <th scope="col">Guru</th>
+                    <th scope="col">Tanggal</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Keterangan</th>
+                    <th scope="col">Bukti</th>
+                    <th scope="col">Aksi Persetujuan</th>
                 </tr>
             </thead>
             <tbody>
@@ -238,14 +239,14 @@
         <table>
             <thead>
                 <tr>
-                    <th>No</th><th>Guru</th><th>ID</th>
-                    <th>Jam Masuk</th><th>Jam Pulang</th>
-                    <th>Status</th><th>Metode</th><th>Telat</th>
-                    <th>Approval</th>
+                    <th scope="col">No</th><th scope="col">Guru</th><th scope="col">ID</th>
+                    <th scope="col">Jam Masuk</th><th scope="col">Jam Pulang</th>
+                    <th scope="col">Status</th><th scope="col">Metode</th><th scope="col">Telat</th>
+                    <th scope="col">Approval</th>
                     @if(auth()->user()->isSuperAdmin())
-                        <th>Edit Jam</th>
+                        <th scope="col">Edit Jam</th>
                     @endif
-                    <th>Aksi</th>
+                    <th scope="col">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -307,12 +308,12 @@
                         @endphp
                         <button type="button"
                             class="btn btn-secondary btn-sm btn-edit-jam"
-                            title="Edit jam masuk & pulang"
+                            aria-label="Edit jam masuk dan pulang {{ $p->guru->nama ?? '-' }}"
                             data-id="{{ $p->id }}"
                             data-jm="{{ $jmEdit }}"
                             data-jp="{{ $jpEdit }}"
                             data-nama="{{ $p->guru->nama ?? '-' }}">
-                            <i class="fas fa-clock"></i> Jam
+                            <i class="fas fa-clock" aria-hidden="true"></i> Jam
                         </button>
                     @else
                         <span style="color:#94a3b8;font-size:.8rem">—</span>
@@ -326,8 +327,8 @@
                             class="btn btn-secondary btn-sm btn-input-manual"
                             data-guru-id="{{ $p->guru_id }}"
                             data-tanggal="{{ $tanggal->format('Y-m-d') }}"
-                            title="Input presensi manual untuk guru ini">
-                            <i class="fas fa-pen"></i> Input
+                            aria-label="Input presensi manual untuk {{ $p->guru->nama ?? 'guru ini' }}">
+                            <i class="fas fa-pen" aria-hidden="true"></i> Input
                         </button>
                     @else
                         {{-- Baris nyata: form update status --}}

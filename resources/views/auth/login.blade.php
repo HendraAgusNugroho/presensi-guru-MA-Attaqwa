@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#2d6a4f">
+    <link rel="icon" href="{{ asset('images/logo-sekolah.png') }}" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo-sekolah.png') }}">
     <meta name="description" content="Halaman login Sistem Presensi Guru MA Attaqwa — khusus staf dan guru terdaftar.">
+    <link rel="canonical" href="{{ url('/login') }}">
     <title>Login — Sistem Presensi Guru MA Attaqwa</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

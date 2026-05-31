@@ -25,9 +25,26 @@
         });
     }
 
+    function bindConfirmActions(root) {
+        (root || document).querySelectorAll('[data-confirm]').forEach(function (el) {
+            if (el.dataset.confirmBound === '1') return;
+            el.dataset.confirmBound = '1';
+
+            var eventName = el.tagName === 'FORM' ? 'submit' : 'click';
+            el.addEventListener(eventName, function (e) {
+                var msg = el.getAttribute('data-confirm');
+                if (msg && !window.confirm(msg)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         bindPasswordToggles(document);
+        bindConfirmActions(document);
     });
 
     window.bindPasswordToggles = bindPasswordToggles;
+    window.bindConfirmActions = bindConfirmActions;
 })();

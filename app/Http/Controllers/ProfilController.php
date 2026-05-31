@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -10,7 +12,8 @@ class ProfilController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $user = User::query()->with('guru')->findOrFail(Auth::id());
+
         return view('profil.index', compact('user'));
     }
 
@@ -21,13 +24,13 @@ class ProfilController extends Controller
             'password_baru' => ['required', 'confirmed', Password::min(6)],
         ]);
 
-        $user = auth()->user();
+        $user = User::query()->findOrFail(Auth::id());
 
-        if (!Hash::check($request->password_lama, $user->password)) {
-            return back()->withErrors(['password_lama' => 'Password lama tidak sesuai.']);
+        if (! Hash::check($request->password_lama, $user->password)) {
+            return back()->withErrors(['password_lama' => 'Password lama tidak sesuai.'])->withInput();
         }
 
-        $user->update(['password' => Hash::make($request->password_baru)]);
+        $user->update(['password' => $request->password_baru]);
 
         return back()->with('success', 'Password berhasil diubah.');
     }

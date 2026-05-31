@@ -4,13 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="robots" content="index, follow">
     <meta name="description" content="@yield('meta_description', 'Sistem Presensi Guru MA Attaqwa — kelola kehadiran, laporan, dan rekapitulasi guru secara digital.')">
+    <meta name="author" content="MA Attaqwa — YPIA Daarul Mu'min">
     <meta name="theme-color" content="#2d6a4f">
+    <link rel="icon" href="{{ asset('images/logo-sekolah.png') }}" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo-sekolah.png') }}">
+    <link rel="canonical" href="{{ url()->current() }}">
     <meta property="og:title" content="@yield('title', 'Dashboard') — Presensi Guru MA Attaqwa">
     <meta property="og:description" content="@yield('meta_description', 'Sistem Presensi Guru MA Attaqwa — kelola kehadiran, laporan, dan rekapitulasi guru secara digital.')">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ config('app.url') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:locale" content="id_ID">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="@yield('title', 'Dashboard') — Presensi Guru MA Attaqwa">
+    <meta name="twitter:description" content="@yield('meta_description', 'Sistem Presensi Guru MA Attaqwa — kelola kehadiran, laporan, dan rekapitulasi guru secara digital.')">
     <title>@yield('title', 'Dashboard') — Presensi Guru MA Attaqwa</title>
     {{-- Font Inter — load langsung agar ukuran teks konsisten lokal & deploy --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,8 +38,8 @@
 <a href="#main-content" class="skip-link">Langsung ke konten utama</a>
 
 <!-- Preloader -->
-<div class="preloader" id="preloader">
-    <div class="spinner"></div>
+<div class="preloader" id="preloader" role="status" aria-live="polite" aria-label="Memuat data">
+    <div class="spinner" aria-hidden="true"></div>
     <span style="font-size:.88rem;color:#5a7a5a;font-weight:600">Memuat data...</span>
 </div>
 
@@ -98,74 +106,83 @@
     <nav class="sidebar-nav" aria-label="Menu utama">
 
         @if(auth()->user()->isGuru())
-            <div class="nav-section">Presensi Saya</div>
+            <div class="nav-section" role="presentation">Presensi Saya</div>
             <a href="{{ route('guru.barcode_saya') }}"
-               class="nav-link @if(request()->routeIs('guru.barcode_saya')) active @endif">
-                <i class="fas fa-qrcode"></i> QR Code Saya
+               class="nav-link @if(request()->routeIs('guru.barcode_saya')) active @endif"
+               @if(request()->routeIs('guru.barcode_saya')) aria-current="page" @endif>
+                <i class="fas fa-qrcode" aria-hidden="true"></i> QR Code Saya
             </a>
             <a href="{{ route('presensi.saya') }}"
-               class="nav-link @if(request()->routeIs('presensi.saya')) active @endif">
-                <i class="fas fa-calendar-check"></i> Riwayat Presensi
+               class="nav-link @if(request()->routeIs('presensi.saya')) active @endif"
+               @if(request()->routeIs('presensi.saya')) aria-current="page" @endif>
+                <i class="fas fa-calendar-check" aria-hidden="true"></i> Riwayat Presensi
             </a>
             <a href="{{ route('presensi.izin_sakit') }}"
-               class="nav-link @if(request()->routeIs('presensi.izin_sakit')) active @endif">
-                <i class="fas fa-file-medical"></i> Izin / Sakit
+               class="nav-link @if(request()->routeIs('presensi.izin_sakit')) active @endif"
+               @if(request()->routeIs('presensi.izin_sakit')) aria-current="page" @endif>
+                <i class="fas fa-file-medical" aria-hidden="true"></i> Izin / Sakit
             </a>
         @endif
 
         @if(auth()->user()->isStaff())
-            <div class="nav-section">Utama</div>
+            <div class="nav-section" role="presentation">Utama</div>
             <a href="{{ route('dashboard') }}"
                class="nav-link @if(request()->routeIs('dashboard')) active @endif"
                @if(request()->routeIs('dashboard')) aria-current="page" @endif>
-                <i class="fas fa-chart-line"></i> Dashboard
+                <i class="fas fa-chart-line" aria-hidden="true"></i> Dashboard
             </a>
 
-            <div class="nav-divider"></div>
-            <div class="nav-section">Presensi</div>
+            <div class="nav-divider" role="presentation"></div>
+            <div class="nav-section" role="presentation">Presensi</div>
             <a href="{{ route('presensi.scan') }}"
-               class="nav-link @if(request()->routeIs('presensi.scan')) active @endif">
-                <i class="fas fa-qrcode"></i> Scan QR Code
+               class="nav-link @if(request()->routeIs('presensi.scan')) active @endif"
+               @if(request()->routeIs('presensi.scan')) aria-current="page" @endif>
+                <i class="fas fa-qrcode" aria-hidden="true"></i> Scan QR Code
             </a>
             <a href="{{ route('presensi.index') }}"
                class="nav-link @if(request()->routeIs('presensi.index')) active @endif"
                @if(request()->routeIs('presensi.index')) aria-current="page" @endif>
-                <i class="fas fa-list-check"></i> Data Presensi
+                <i class="fas fa-list-check" aria-hidden="true"></i> Data Presensi
             </a>
 
-            <div class="nav-divider"></div>
-            <div class="nav-section">Data</div>
+            <div class="nav-divider" role="presentation"></div>
+            <div class="nav-section" role="presentation">Data</div>
             <a href="{{ route('guru.index') }}"
-               class="nav-link @if(request()->routeIs('guru.*') && !request()->routeIs('guru.barcode_saya')) active @endif">
-                <i class="fas fa-chalkboard-teacher"></i> Data Guru
+               class="nav-link @if(request()->routeIs('guru.*') && !request()->routeIs('guru.barcode_saya')) active @endif"
+               @if(request()->routeIs('guru.*') && !request()->routeIs('guru.barcode_saya')) aria-current="page" @endif>
+                <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> Data Guru
             </a>
             <a href="{{ route('fingerprint.import') }}"
-               class="nav-link @if(request()->routeIs('fingerprint.*')) active @endif">
-                <i class="fas fa-fingerprint"></i> Import Fingerprint
+               class="nav-link @if(request()->routeIs('fingerprint.*')) active @endif"
+               @if(request()->routeIs('fingerprint.*')) aria-current="page" @endif>
+                <i class="fas fa-fingerprint" aria-hidden="true"></i> Import Fingerprint
             </a>
             <a href="{{ route('jadwal_guru.index') }}"
-               class="nav-link @if(request()->routeIs('jadwal_guru.*')) active @endif">
-                <i class="fas fa-calendar-days"></i> Jadwal Guru
+               class="nav-link @if(request()->routeIs('jadwal_guru.*')) active @endif"
+               @if(request()->routeIs('jadwal_guru.*')) aria-current="page" @endif>
+                <i class="fas fa-calendar-days" aria-hidden="true"></i> Jadwal Guru
             </a>
 
-            <div class="nav-divider"></div>
-            <div class="nav-section">Laporan</div>
+            <div class="nav-divider" role="presentation"></div>
+            <div class="nav-section" role="presentation">Laporan</div>
             <a href="{{ route('laporan.index') }}"
-               class="nav-link @if(request()->routeIs('laporan.*')) active @endif">
-                <i class="fas fa-chart-bar"></i> Laporan Presensi
+               class="nav-link @if(request()->routeIs('laporan.*')) active @endif"
+               @if(request()->routeIs('laporan.*')) aria-current="page" @endif>
+                <i class="fas fa-chart-bar" aria-hidden="true"></i> Laporan Presensi
             </a>
         @endif
 
         @if(auth()->user()->isSuperAdmin())
-            <div class="nav-divider"></div>
-            <div class="nav-section" style="color:#fca5a5;">
-                <i class="fas fa-shield-halved" style="margin-right:4px;font-size:.65rem"></i>
+            <div class="nav-divider" role="presentation"></div>
+            <div class="nav-section" style="color:#fca5a5;" role="presentation">
+                <i class="fas fa-shield-halved" style="margin-right:4px;font-size:.65rem" aria-hidden="true"></i>
                 Super Admin
             </div>
             <a href="{{ route('pengguna.index') }}"
-               class="nav-link @if(request()->routeIs('pengguna.*')) active @endif">
-                <i class="fas fa-users-gear"></i> Manajemen Pengguna
-                <span style="margin-left:auto;font-size:.6rem;background:#dc2626;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700">SA</span>
+               class="nav-link @if(request()->routeIs('pengguna.*')) active @endif"
+               @if(request()->routeIs('pengguna.*')) aria-current="page" @endif>
+                <i class="fas fa-users-gear" aria-hidden="true"></i> Manajemen Pengguna
+                <span style="margin-left:auto;font-size:.6rem;background:#dc2626;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700" aria-label="Super Admin">SA</span>
             </a>
         @endif
     </nav>
@@ -184,30 +201,30 @@
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="btn-logout" style="width:100%;text-align:center;justify-content:center;">
-                <i class="fas fa-right-from-bracket"></i> Keluar
+                <i class="fas fa-right-from-bracket" aria-hidden="true"></i> Keluar
             </button>
         </form>
     </div>
 </aside>
 
 <!-- Main Content -->
-<main class="main-content">
+<main class="main-content" id="main-content">
     <!-- Topbar -->
     <div class="topbar">
         <div style="display:flex;align-items:center;gap:12px;">
             <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()"
                     aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="sidebar">
-                <span></span><span></span><span></span>
+                <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
             </button>
             <span class="topbar-title">@yield('title', 'Dashboard')</span>
         </div>
         <div class="topbar-right">
             <span class="hide-xs" style="font-size:.8rem;color:#5a7a5a;display:flex;align-items:center;gap:6px;">
-                <i class="fas fa-calendar" style="color:hsl(145,60%,35%)"></i>
-                {{ now()->isoFormat('dddd, D MMMM Y') }}
+                <i class="fas fa-calendar" style="color:hsl(145,60%,35%)" aria-hidden="true"></i>
+                <time datetime="{{ now()->toDateString() }}">{{ now()->isoFormat('dddd, D MMMM Y') }}</time>
             </span>
             <span class="topbar-role-badge topbar-role-badge--{{ auth()->user()->role }}">
-                <i class="fas {{ $roleIcon }}"></i>
+                <i class="fas {{ $roleIcon }}" aria-hidden="true"></i>
                 {{ auth()->user()->role_label }}
             </span>
         </div>
@@ -330,7 +347,7 @@
     <script type="application/json" id="app-flash-data">{!! json_encode($appFlash, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
     @endif
 
-    <div class="content-area" id="main-content">@yield('content')</div>
+    <div class="content-area">@yield('content')</div>
 </main>
 
 <script>
@@ -404,13 +421,5 @@ window.addEventListener('resize', function(){
 </script>
 @stack('scripts')
 <script src="{{ asset('js/app.js') }}?v={{ $jsVer }}"></script>
-<script>
-document.querySelectorAll('[data-confirm]').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-        var msg = btn.getAttribute('data-confirm');
-        if (msg && !confirm(msg)) e.preventDefault();
-    });
-});
-</script>
 </body>
 </html>
