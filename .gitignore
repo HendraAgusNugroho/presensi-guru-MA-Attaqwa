@@ -4,7 +4,14 @@
 /storage/*.key
 /storage/framework/sessions/*
 !/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
 /vendor
+/bootstrap/cache/config.php
 .env
 .env.*
 !.env.example

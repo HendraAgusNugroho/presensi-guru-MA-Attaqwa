@@ -29,6 +29,7 @@ mkdir -p storage/framework/{sessions,views,cache/data} storage/logs bootstrap/ca
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
 php artisan config:clear 2>/dev/null || true
+php artisan view:clear 2>/dev/null || true
 rm -f bootstrap/cache/config.php 2>/dev/null || true
 
 echo "==> Menjalankan migrate..."
