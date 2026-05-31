@@ -14,7 +14,7 @@
 
 <!-- Filter -->
 <div class="card">
-    <form method="GET" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+    <form method="GET" class="filter-form" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
         <div class="form-group" style="margin:0;flex:1;min-width:140px">
             <label>Tanggal</label>
             <input type="date" name="tanggal" class="form-control"
@@ -200,18 +200,18 @@
                         <form method="POST" action="{{ route('presensi.approval', $p) }}" style="display:inline">
                             @csrf @method('PATCH')
                             <input type="hidden" name="approval_status" value="disetujui">
-                            <button type="submit" class="btn btn-sm"
+                            <button type="submit" class="btn btn-sm btn-confirm"
                                 style="background:#dcfce7;color:#15803d;border:1.5px solid #86efac;font-size:.75rem;font-weight:700;padding:5px 10px;border-radius:7px;cursor:pointer;font-family:'Inter',sans-serif;"
-                                onclick="return confirm('Setujui pengajuan {{ $p->status }} {{ $p->guru->nama ?? "" }}?')">
+                                data-confirm="Setujui pengajuan {{ $p->status }} {{ $p->guru->nama ?? '-' }}?">
                                 <i class="fas fa-check"></i> Setujui
                             </button>
                         </form>
                         <form method="POST" action="{{ route('presensi.approval', $p) }}" style="display:inline">
                             @csrf @method('PATCH')
                             <input type="hidden" name="approval_status" value="ditolak">
-                            <button type="submit" class="btn btn-sm"
+                            <button type="submit" class="btn btn-sm btn-confirm"
                                 style="background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;font-size:.75rem;font-weight:700;padding:5px 10px;border-radius:7px;cursor:pointer;font-family:'Inter',sans-serif;"
-                                onclick="return confirm('Tolak pengajuan {{ $p->status }} {{ $p->guru->nama ?? "" }}?')">
+                                data-confirm="Tolak pengajuan {{ $p->status }} {{ $p->guru->nama ?? '-' }}?">
                                 <i class="fas fa-xmark"></i> Tolak
                             </button>
                         </form>
@@ -251,7 +251,7 @@
             <tbody>
             @forelse($presensis as $i => $p)
             @php $isVirtual = !($p->id ?? false); @endphp
-            <tr style="{{ $isVirtual ? 'background:#fafafa;opacity:.88;' : '' }}">
+            <tr @if($isVirtual) class="tr-virtual" @endif>
                 <td>{{ $i + 1 }}</td>
                 <td>
                     <strong>{{ $p->guru->nama ?? '-' }}</strong>
@@ -280,16 +280,20 @@
                 <td>
                     @if(in_array($p->status, ['izin','sakit']))
                         @php
-                            $apLabel = match($p->approval_status ?? null) {
-                                'menunggu'  => ['#fef9c3','#a16207','Menunggu'],
-                                'disetujui' => ['#dcfce7','#15803d','Disetujui'],
-                                'ditolak'   => ['#fee2e2','#dc2626','Ditolak'],
-                                default     => ['#f1f5f9','#94a3b8','—'],
+                            $apClass = match($p->approval_status ?? null) {
+                                'menunggu'  => 'approval-menunggu',
+                                'disetujui' => 'approval-disetujui',
+                                'ditolak'   => 'approval-ditolak',
+                                default     => 'approval-none',
+                            };
+                            $apText = match($p->approval_status ?? null) {
+                                'menunggu'  => 'Menunggu',
+                                'disetujui' => 'Disetujui',
+                                'ditolak'   => 'Ditolak',
+                                default     => '—',
                             };
                         @endphp
-                        <span style="background:{{ $apLabel[0] }};color:{{ $apLabel[1] }};font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:5px;">
-                            {{ $apLabel[2] }}
-                        </span>
+                        <span class="approval-badge {{ $apClass }}">{{ $apText }}</span>
                     @else
                         <span style="color:#94a3b8;font-size:.8rem">—</span>
                     @endif
@@ -302,9 +306,12 @@
                             $jpEdit = $p->jam_pulang ? \Carbon\Carbon::parse($p->jam_pulang)->format('H:i') : '';
                         @endphp
                         <button type="button"
-                            class="btn btn-secondary btn-sm"
+                            class="btn btn-secondary btn-sm btn-edit-jam"
                             title="Edit jam masuk & pulang"
-                            onclick="bukaModalJam({{ $p->id }}, @json($jmEdit), @json($jpEdit), @json($p->guru->nama ?? '-'))">
+                            data-id="{{ $p->id }}"
+                            data-jm="{{ $jmEdit }}"
+                            data-jp="{{ $jpEdit }}"
+                            data-nama="{{ $p->guru->nama ?? '-' }}">
                             <i class="fas fa-clock"></i> Jam
                         </button>
                     @else
@@ -316,8 +323,9 @@
                     @if($isVirtual)
                         {{-- Baris virtual: tombol input manual cepat --}}
                         <button type="button"
-                            onclick="inputManualCepat({{ $p->guru_id }}, '{{ $tanggal->format('Y-m-d') }}')"
-                            class="btn btn-secondary btn-sm"
+                            class="btn btn-secondary btn-sm btn-input-manual"
+                            data-guru-id="{{ $p->guru_id }}"
+                            data-tanggal="{{ $tanggal->format('Y-m-d') }}"
                             title="Input presensi manual untuk guru ini">
                             <i class="fas fa-pen"></i> Input
                         </button>
@@ -353,6 +361,7 @@
 </div>
 
 @if(auth()->user()->isSuperAdmin())
+<input type="hidden" id="presensi-base-url" value="{{ url('/') }}">
 <div id="modalJamBackdrop" class="modal-jam-backdrop" style="display:none;" onclick="if(event.target===this) tutupModalJam()"></div>
 <div id="modalJam" class="modal-jam" role="dialog" aria-modal="true" aria-labelledby="modalJamTitle" style="display:none;">
     <div class="modal-jam-inner">
@@ -387,10 +396,12 @@
 @endsection
 
 @push('scripts')
-<script>
 @if(auth()->user()->isSuperAdmin())
+<script>
 function jamManualActionUrl(id) {
-    return @json(url('/')) + '/presensi/' + id + '/jam-manual';
+    var baseEl = document.getElementById('presensi-base-url');
+    var base = baseEl ? baseEl.value : '';
+    return base + '/presensi/' + id + '/jam-manual';
 }
 function bukaModalJam(id, jamMasuk, jamPulang, namaGuru) {
     var form = document.getElementById('formJamManual');
@@ -418,13 +429,33 @@ document.addEventListener('keydown', function(e) {
         tutupModalJam();
     }
 });
+document.querySelectorAll('.btn-edit-jam').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        bukaModalJam(
+            btn.dataset.id,
+            btn.dataset.jm || '',
+            btn.dataset.jp || '',
+            btn.dataset.nama || ''
+        );
+    });
+});
+</script>
 @endif
+<script>
+document.querySelectorAll('.btn-confirm').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+        var msg = btn.getAttribute('data-confirm');
+        if (msg && !confirm(msg)) {
+            e.preventDefault();
+        }
+    });
+});
+
 function toggleManual() {
     const f = document.getElementById('formManual');
     f.style.display = f.style.display === 'none' ? 'block' : 'none';
 }
 
-// Pre-fill form manual dan scroll ke sana
 function inputManualCepat(guruId, tanggal) {
     const form = document.getElementById('formManual');
     form.style.display = 'block';
@@ -433,5 +464,11 @@ function inputManualCepat(guruId, tanggal) {
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
     document.getElementById('manualGuruId').focus();
 }
+
+document.querySelectorAll('.btn-input-manual').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        inputManualCepat(btn.dataset.guruId, btn.dataset.tanggal);
+    });
+});
 </script>
 @endpush

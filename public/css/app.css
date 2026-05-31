@@ -22,6 +22,11 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     font-size: 15px;
@@ -221,6 +226,23 @@ tr:hover td { background: hsl(145,60%,98%); }
 .badge-izin        { background: #dbeafe; color: #1d4ed8; }
 .badge-sakit       { background: #ffedd5; color: #c2410c; }
 .badge-alpha       { background: #fce7f3; color: #9d174d; }
+
+/* Approval status (presensi) */
+.approval-badge {
+    display: inline-block;
+    font-size: .7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+.approval-menunggu  { background: #fef9c3; color: #a16207; }
+.approval-disetujui { background: #dcfce7; color: #15803d; }
+.approval-ditolak   { background: #fee2e2; color: #dc2626; }
+.approval-none      { background: #f1f5f9; color: #94a3b8; }
+
+tr.tr-virtual td { background: #fafafa; }
+tr.tr-virtual { opacity: .88; }
 
 /* ---- BUTTONS ---- */
 .btn {

@@ -25,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
 
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
+            if (! $this->app->runningInConsole() && request()->hasHeader('Host')) {
+                URL::forceRootUrl('https://' . request()->getHost());
+            }
         }
 
         // Gunakan Bootstrap pagination agar sesuai dengan CSS custom project
