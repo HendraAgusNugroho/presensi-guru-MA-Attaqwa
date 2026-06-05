@@ -27,3 +27,4 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/database/presensi_guru.sql

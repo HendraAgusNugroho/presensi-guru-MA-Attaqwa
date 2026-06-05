@@ -24,6 +24,12 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
 html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -37,15 +43,15 @@ body {
     min-height: 100vh;
 }
 
-/* Desktop lebar: tengahkan layout agar tidak melebar di monitor besar */
+/* Desktop lebar: full width layout */
 @media (min-width: 1360px) {
     .sidebar {
-        left: calc((100vw - var(--layout-max)) / 2);
+        left: 0;
     }
     .main-content {
-        margin-left: calc((100vw - var(--layout-max)) / 2 + var(--sidebar-w));
-        width: var(--content-max);
-        max-width: var(--content-max);
+        margin-left: var(--sidebar-w);
+        width: calc(100% - var(--sidebar-w));
+        max-width: none;
     }
 }
 
@@ -160,7 +166,6 @@ body {
     margin-left: var(--sidebar-w);
     min-height: 100vh;
     width: calc(100% - var(--sidebar-w));
-    max-width: var(--content-max);
 }
 .topbar {
     background: var(--card-bg);

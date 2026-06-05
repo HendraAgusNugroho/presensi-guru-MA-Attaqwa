@@ -28,6 +28,20 @@ class JadwalGuruController extends Controller
         return view('jadwal_guru.index', compact('gurus', 'namaHari'));
     }
 
+    public function jadwalSaya()
+    {
+        $guru = auth()->user()->guru;
+        if (!$guru) {
+            return back()->with('error', 'Data guru tidak ditemukan.');
+        }
+
+        $guru->load(['jadwalHarian' => fn($q) => $q->orderBy('hari')]);
+
+        $namaHari = self::HARI;
+
+        return view('jadwal_guru.saya', compact('guru', 'namaHari'));
+    }
+
     public function simpan(Request $request)
     {
         $request->validate([

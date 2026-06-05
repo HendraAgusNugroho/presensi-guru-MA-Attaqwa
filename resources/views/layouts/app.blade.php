@@ -117,6 +117,11 @@
                @if(request()->routeIs('presensi.saya')) aria-current="page" @endif>
                 <i class="fas fa-calendar-check" aria-hidden="true"></i> Riwayat Presensi
             </a>
+            <a href="{{ route('jadwal_guru.saya') }}"
+               class="nav-link @if(request()->routeIs('jadwal_guru.saya')) active @endif"
+               @if(request()->routeIs('jadwal_guru.saya')) aria-current="page" @endif>
+                <i class="fas fa-calendar-days" aria-hidden="true"></i> Jadwal Saya
+            </a>
             <a href="{{ route('presensi.izin_sakit') }}"
                class="nav-link @if(request()->routeIs('presensi.izin_sakit')) active @endif"
                @if(request()->routeIs('presensi.izin_sakit')) aria-current="page" @endif>

@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:guru')->group(function () {
         Route::get('/presensi-saya', [PresensiController::class, 'presensiSaya'])->name('presensi.saya');
         Route::get('/barcode-saya', [GuruController::class, 'barcodeSaya'])->name('guru.barcode_saya');
+        Route::get('/jadwal-saya', [JadwalGuruController::class, 'jadwalSaya'])->name('jadwal_guru.saya');
         Route::get('/izin-sakit', [PresensiController::class, 'izinSakit'])->name('presensi.izin_sakit');
         Route::post('/izin-sakit', [PresensiController::class, 'ajukanIzinSakit'])->name('presensi.ajukan_izin_sakit');
     });

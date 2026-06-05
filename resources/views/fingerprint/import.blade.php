@@ -149,31 +149,38 @@
                 </div>
                 <div class="step-item">
                     <div class="step-num">2</div>
-                    <div class="step-text">Kolom A: <strong>ID Fingerprint</strong> (contoh: FP001)<br>Kolom B: <strong>Waktu Scan</strong> (contoh: 2025-01-15 07:05:30)</div>
+                    <div class="step-text">Sistem akan <strong>otomatis mendeteksi kolom</strong> Nama Guru, Tanggal, dan Waktu Scan dari header file</div>
                 </div>
                 <div class="step-item">
                     <div class="step-num">3</div>
-                    <div class="step-text">Baris pertama adalah <strong>header</strong> dan akan dilewati otomatis</div>
+                    <div class="step-text">Pastikan <strong>tidak ada sel kosong</strong> di kolom Nama, Tanggal, atau Waktu</div>
                 </div>
                 <div class="step-item">
                     <div class="step-num">4</div>
-                    <div class="step-text">Sistem akan mencocokkan ID fingerprint dengan data guru. Pastikan <strong>ID fingerprint guru sudah diisi</strong> di menu Data Guru</div>
+                    <div class="step-text">Sistem mencocokkan <strong>Nama Guru</strong> (case-insensitive) dengan database. Pastikan nama di Excel SAMA dengan di Data Guru</div>
                 </div>
                 <div class="step-item">
                     <div class="step-num">5</div>
+                    <div class="step-text">Jika ada beberapa scan per hari: scan paling awal = Jam Masuk, scan paling akhir = Jam Keluar</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">6</div>
                     <div class="step-text">Waktu masuk sebelum <strong>batas toleransi jadwal</strong> = HADIR. Setelah batas = TERLAMBAT</div>
                 </div>
             </div>
 
             <!-- Contoh format -->
             <div style="margin-top:12px">
-                <div style="font-size:.8rem;font-weight:700;margin-bottom:6px;color:#1a2e1a">Contoh format file:</div>
+                <div style="font-size:.8rem;font-weight:700;margin-bottom:6px;color:#1a2e1a">Contoh format file Excel dari mesin fingerprint:</div>
                 <div class="code-block">
-                    <span class="comment">id_fingerprint,waktu_scan</span><br>
-                    <span class="val">FP001,2025-01-15 07:02:30</span><br>
-                    <span class="val">FP002,2025-01-15 07:18:45</span><br>
-                    <span class="val">FP003,2025-01-15 06:58:10</span><br>
-                    <span class="val">FP001,2025-01-15 15:03:20</span>
+                    <span class="comment">Nama Guru,Tanggal,Waktu</span><br>
+                    <span class="val">Fitriani Shofwa,2025-01-15,07:02:30</span><br>
+                    <span class="val">Sopandi,2025-01-15,07:18:45</span><br>
+                    <span class="val">Qurrata A'ayuni,2025-01-15,06:58:10</span><br>
+                    <span class="val">Fitriani Shofwa,2025-01-15,15:03:20</span>
+                </div>
+                <div style="margin-top:8px;font-size:.78rem;color:#5a7a5a">
+                    <i class="fas fa-lightbulb" style="color:#f59e0b"></i> <strong>Tip:</strong> Sistem mendukung berbagai format tanggal/waktu seperti YYYY-MM-DD, DD/MM/YYYY, HH:MM:SS, dll.
                 </div>
             </div>
         </div>
