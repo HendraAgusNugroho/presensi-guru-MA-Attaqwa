@@ -68,7 +68,7 @@
                     @error('name')<div style="color:#dc2626;font-size:.8rem;margin-top:4px">{{ $message }}</div>@enderror
                 </div>
                 <div class="form-group">
-                    <label>NIP <span style="color:red">*</span></label>
+                    <label>ID <span style="color:red">*</span></label>
                     <input type="text" name="id_pengguna" class="form-control"
                            value="{{ old('id_pengguna', $pengguna->id_pengguna) }}" required>
                     @error('id_pengguna')<div style="color:#dc2626;font-size:.8rem;margin-top:4px">{{ $message }}</div>@enderror
