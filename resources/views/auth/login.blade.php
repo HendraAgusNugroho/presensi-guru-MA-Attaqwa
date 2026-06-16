@@ -205,7 +205,7 @@
         </div>
         <div class="login-body">
             <h1 class="login-title">
-                <i class="fas fa-fingerprint" style="color:hsl(145,60%,28%)" aria-hidden="true"></i>
+                <i class="fas fa-qrcode" style="color:hsl(145,60%,28%)" aria-hidden="true"></i>
                 Sistem Presensi Guru
             </h1>
             <p class="login-sub">Masuk menggunakan ID dan password Anda</p>

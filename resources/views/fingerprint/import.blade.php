@@ -149,22 +149,18 @@
                 </div>
                 <div class="step-item">
                     <div class="step-num">2</div>
-                    <div class="step-text">Sistem akan <strong>otomatis mendeteksi kolom</strong> Nama Guru, Tanggal, dan Waktu Scan dari header file</div>
+                    <div class="step-text">File Excel harus dalam format <strong>horizontal per blok karyawan</strong> dengan kolom tanggal 1-31</div>
                 </div>
                 <div class="step-item">
                     <div class="step-num">3</div>
-                    <div class="step-text">Pastikan <strong>tidak ada sel kosong</strong> di kolom Nama, Tanggal, atau Waktu</div>
+                    <div class="step-text">Sistem akan <strong>otomatis mendeteksi Nama Guru</strong> dan mencocockkannya dengan database guru (case-insensitive)</div>
                 </div>
                 <div class="step-item">
                     <div class="step-num">4</div>
-                    <div class="step-text">Sistem mencocokkan <strong>Nama Guru</strong> (case-insensitive) dengan database. Pastikan nama di Excel SAMA dengan di Data Guru</div>
+                    <div class="step-text">Format jam dalam sel: <strong>Jam Masuk</strong> dan <strong>Jam Pulang</strong> dipisahkan dengan baris baru (Enter)</div>
                 </div>
                 <div class="step-item">
                     <div class="step-num">5</div>
-                    <div class="step-text">Jika ada beberapa scan per hari: scan paling awal = Jam Masuk, scan paling akhir = Jam Keluar</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-num">6</div>
                     <div class="step-text">Waktu masuk sebelum <strong>batas toleransi jadwal</strong> = HADIR. Setelah batas = TERLAMBAT</div>
                 </div>
             </div>
@@ -173,14 +169,15 @@
             <div style="margin-top:12px">
                 <div style="font-size:.8rem;font-weight:700;margin-bottom:6px;color:#1a2e1a">Contoh format file Excel dari mesin fingerprint:</div>
                 <div class="code-block">
-                    <span class="comment">Nama Guru,Tanggal,Waktu</span><br>
-                    <span class="val">Fitriani Shofwa,2025-01-15,07:02:30</span><br>
-                    <span class="val">Sopandi,2025-01-15,07:18:45</span><br>
-                    <span class="val">Qurrata A'ayuni,2025-01-15,06:58:10</span><br>
-                    <span class="val">Fitriani Shofwa,2025-01-15,15:03:20</span>
+                    <span class="comment">User ID.： | Nama： | 1 | 2 | 3 | 4 | 5 | ... | 31</span><br>
+                    <span class="val">1 | FITHRIYANI SHOFWA | | 07:00 | | 06:45 | 07:10 |</span><br>
+                    <span class="val">2 | HASBULLAH,S.Ag | | 06:58 | | 06:40 | 07:05 | 07:47</span>
                 </div>
                 <div style="margin-top:8px;font-size:.78rem;color:#5a7a5a">
-                    <i class="fas fa-lightbulb" style="color:#f59e0b"></i> <strong>Tip:</strong> Sistem mendukung berbagai format tanggal/waktu seperti YYYY-MM-DD, DD/MM/YYYY, HH:MM:SS, dll.
+                    <i class="fas fa-lightbulb" style="color:#f59e0b"></i> <strong>Format jam dalam sel:</strong><br>
+                    - Satu jam: <code>07:00</code> (hanya jam masuk)<br>
+                    - Dua jam: <code>07:00</code> (baris baru) <code>15:00</code> (jam masuk dan pulang)<br>
+                    - Nama Guru harus SAMA dengan nama di database guru (case-insensitive)
                 </div>
             </div>
         </div>
