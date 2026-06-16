@@ -69,58 +69,150 @@ class FingerprintController extends Controller
             ]);
         }
 
-        // Auto-detect column positions from header
-        $header = $rows[0] ?? [];
-        $namaColIndex = null;
-        $tanggalColIndex = null;
-        $waktuColIndex = null;
+        // Parse horizontal format: User ID blocks with date columns (1-31)
+        // Structure per employee block:
+        // Row 1: User ID info (User ID.： in col 4, ID in col 5, Nama： in col 10, Name in col 11)
+        // Row 2: Date headers (1, 2, 3, ... 26)
+        // Row 3: Attendance data (format: "07:00\n07:00")
 
-        foreach ($header as $colIndex => $value) {
-            $value = strtolower(trim($value ?? ''));
-            if (preg_match('/(nama|name|karyawan|pegawai)/i', $value)) {
-                $namaColIndex = $colIndex;
-            }
-            if (preg_match('/(tanggal|date|tgl)/i', $value)) {
-                $tanggalColIndex = $colIndex;
-            }
-            if (preg_match('/(waktu|time|jam|scan|timestamp)/i', $value)) {
-                $waktuColIndex = $colIndex;
+        $processedData = [];
+        $year = date('Y');
+        $month = date('m');
+
+        // Extract year and month from file info or metadata
+        foreach ($rows as $row) {
+            foreach ($row as $cellValue) {
+                if (preg_match('/(\d{4})/', $cellValue, $matches)) {
+                    $year = $matches[1];
+                }
+                if (preg_match('/(\d{1,2})\/(\d{4})/', $cellValue, $matches)) {
+                    $month = $matches[1];
+                    $year = $matches[2];
+                }
             }
         }
 
-        // If auto-detection still fails, try to find by data pattern
-        if ($namaColIndex === null || $tanggalColIndex === null || $waktuColIndex === null) {
-            foreach ($rows as $rowIndex => $row) {
-                if ($rowIndex === 0) continue;
-                if (empty(array_filter($row, fn($v) => $v !== '' && $v !== null))) continue;
+        // Process each row to find User ID blocks
+        $i = 0;
+        while ($i < count($rows)) {
+            $row = $rows[$i];
 
+            // Skip empty rows
+            if (empty(array_filter($row, fn($v) => $v !== '' && $v !== null))) {
+                $i++;
+                continue;
+            }
+
+            // Look for "User ID.：" in the row to find employee blocks
+            $userIdColIndex = null;
+            $userId = null;
+            $namaGuru = null;
+
+            foreach ($row as $colIndex => $cellValue) {
+                $cellValue = trim((string)$cellValue);
+                if (strpos($cellValue, 'User ID.：') !== false || strpos($cellValue, 'User ID.:') !== false) {
+                    $userIdColIndex = $colIndex;
+                    // User ID is in the next column (we ignore this, but use it to find the block)
+                    if (isset($row[$colIndex + 1])) {
+                        $userId = trim((string)$row[$colIndex + 1]);
+                    }
+                    break;
+                }
+            }
+
+            // If we found User ID, also look for name (this is our key)
+            if ($userId) {
                 foreach ($row as $colIndex => $cellValue) {
-                    $cellValue = trim((string) $cellValue);
-                    if ($namaColIndex === null && preg_match('/^[a-zA-Z\s\.]+$/', $cellValue) && strlen($cellValue) > 3) {
-                        $namaColIndex = $colIndex;
-                    }
-                    if ($tanggalColIndex === null && preg_match('/\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/', $cellValue)) {
-                        $tanggalColIndex = $colIndex;
-                    }
-                    if ($waktuColIndex === null && preg_match('/\d{1,2}:\d{2}/', $cellValue)) {
-                        $waktuColIndex = $colIndex;
+                    $cellValue = trim((string)$cellValue);
+                    if (strpos($cellValue, 'Nama：') !== false || strpos($cellValue, 'Nama.:') !== false) {
+                        // Name is in the next column - THIS IS OUR KEY
+                        if (isset($row[$colIndex + 1])) {
+                            $namaGuru = trim((string)$row[$colIndex + 1]);
+                        }
+                        break;
                     }
                 }
-                if ($namaColIndex !== null && $tanggalColIndex !== null && $waktuColIndex !== null) break;
             }
+
+            // If we found Guru Name, process the next rows
+            if ($namaGuru) {
+                // Next row should be date headers
+                $i++;
+                if ($i >= count($rows)) break;
+
+                $dateHeaderRow = $rows[$i];
+                $dateHeaders = [];
+
+                foreach ($dateHeaderRow as $colIndex => $cellValue) {
+                    if (is_numeric($cellValue) && $cellValue >= 1 && $cellValue <= 31) {
+                        $dateHeaders[$colIndex] = (int)$cellValue;
+                    }
+                }
+
+                // Next row should be attendance data
+                $i++;
+                if ($i >= count($rows)) break;
+
+                $dataRow = $rows[$i];
+
+                // Process attendance data
+                foreach ($dateHeaders as $colIndex => $day) {
+                    $cellValue = trim((string)($dataRow[$colIndex] ?? ''));
+                    if ($cellValue && strpos($cellValue, ':') !== false) {
+                        // Parse cell format: "07:00\n07:00"
+                        $times = explode("\n", str_replace(["\r\n", "\r"], "\n", $cellValue));
+                        $times = array_filter($times, fn($t) => !empty(trim($t)));
+
+                        if (count($times) >= 1) {
+                            $jamMasuk = trim($times[0]);
+                            $jamPulang = count($times) > 1 ? trim($times[1]) : null;
+
+                            // Create date from year, month, day
+                            try {
+                                $tanggal = Carbon::createFromDate($year, $month, $day);
+                                $dateKey = $tanggal->toDateString();
+
+                                // Use nama_guru as key (normalized for flexible matching)
+                                $namaGuruKey = $this->normalizeName($namaGuru);
+
+                                if (!isset($processedData[$namaGuruKey])) {
+                                    $processedData[$namaGuruKey] = [];
+                                }
+                                if (!isset($processedData[$namaGuruKey][$dateKey])) {
+                                    $processedData[$namaGuruKey][$dateKey] = [];
+                                }
+
+                                $processedData[$namaGuruKey][$dateKey] = [
+                                    'jam_masuk'  => $jamMasuk,
+                                    'jam_pulang' => $jamPulang,
+                                    'tanggal'    => $tanggal,
+                                    'nama_guru'  => $namaGuru,
+                                ];
+                            } catch (\Exception $e) {
+                                $errors[] = "Baris " . ($i + 1) . ": Tanggal tidak valid - $year-$month-$day";
+                            }
+                        }
+                    }
+                }
+            }
+
+            $i++;
         }
 
-        // If still not found, default to column 0, 1, 2
-        if ($namaColIndex === null) $namaColIndex = 0;
-        if ($tanggalColIndex === null) $tanggalColIndex = 1;
-        if ($waktuColIndex === null) $waktuColIndex = 2;
-
-        // Debug: Show detected columns and raw data
+        // Debug: Show parsing info
         $debugErrors = [];
-        $debugErrors[] = "DEBUG: Kolom terdeteksi - Nama: kolom $namaColIndex ('" . ($header[$namaColIndex] ?? 'N/A') . "'), Tanggal: kolom $tanggalColIndex ('" . ($header[$tanggalColIndex] ?? 'N/A') . "'), Waktu: kolom $waktuColIndex ('" . ($header[$waktuColIndex] ?? 'N/A') . "')";
-        $debugErrors[] = "DEBUG: Header lengkap: " . implode(' | ', array_slice($header, 0, 10));
-        $debugErrors[] = "DEBUG: Contoh data baris 2: " . implode(' | ', array_slice($rows[1] ?? [], 0, 10));
-        $debugErrors[] = "DEBUG: Total baris: " . count($rows);
+        $debugErrors[] = "DEBUG: Format blok karyawan - Total Nama Guru: " . count($processedData);
+        $debugErrors[] = "DEBUG: Periode: $year-$month";
+        $debugErrors[] = "DEBUG: Total baris file: " . count($rows);
+
+        // Show sample guru names found
+        $sampleGuruNames = array_slice(array_keys($processedData), 0, 5);
+        $debugErrors[] = "DEBUG: Sample Nama Guru dari Excel: " . implode(', ', $sampleGuruNames);
+
+        // Show first 10 guru names from database for debugging
+        $gurusFromDB = Guru::select('id', 'nama')->where('status', 'aktif')->limit(10)->get();
+        $dbGuruNames = $gurusFromDB->pluck('nama')->toArray();
+        $debugErrors[] = "DEBUG: 10 Nama Guru pertama dari database: " . implode(', ', $dbGuruNames);
 
         // Add debug errors to the beginning of errors array
         $errors = array_merge($debugErrors, $errors);
@@ -131,105 +223,34 @@ class FingerprintController extends Controller
             return back()->withErrors(['file' => 'Belum ada jadwal masuk aktif. Hubungi Super Admin untuk mengaktifkan jadwal.']);
         }
 
-        // Group scans by guru and date
-        $scansByGuruDate = [];
+        // Process grouped data by Nama Guru
+        foreach ($processedData as $namaGuruKey => $datesData) {
+            // Get original guru name from first date entry
+            $namaGuruDariExcel = $datesData[array_key_first($datesData)]['nama_guru'] ?? $namaGuruKey;
 
-        foreach ($rows as $i => $row) {
-            if ($i === 0) continue; // Skip header
-            if (empty(array_filter($row, fn($v) => $v !== '' && $v !== null))) continue; // Skip empty rows
-
-            $nama     = trim((string) ($row[$namaColIndex] ?? ''));
-            $tanggalRaw = trim((string) ($row[$tanggalColIndex] ?? ''));
-            $waktuRaw = trim((string) ($row[$waktuColIndex] ?? ''));
-
-            if (!$nama || !$tanggalRaw || !$waktuRaw) {
-                $gagal++;
-                $errors[] = "Baris " . ($i + 1) . ": Nama, tanggal, atau waktu kosong (Nama: '$nama', Tanggal: '$tanggalRaw', Waktu: '$waktuRaw')";
-                continue;
-            }
-
-            // Parse tanggal
-            $tanggal = null;
-            $dateFormats = ['Y-m-d', 'd/m/Y', 'd-m-Y', 'Y/m/d', 'm/d/Y'];
-            foreach ($dateFormats as $fmt) {
-                try {
-                    $parsed = Carbon::createFromFormat($fmt, $tanggalRaw);
-                    if ($parsed !== false) { $tanggal = $parsed; break; }
-                } catch (\Exception $e) {}
-            }
-            if (!$tanggal) {
-                try { $tanggal = Carbon::parse($tanggalRaw); } catch (\Exception $e) {}
-            }
-
-            // Parse waktu
-            $waktu = null;
-            $timeFormats = ['H:i:s', 'H:i', 'h:i:s A', 'h:i A'];
-            foreach ($timeFormats as $fmt) {
-                try {
-                    $parsed = Carbon::createFromFormat($fmt, $waktuRaw);
-                    if ($parsed !== false) { $waktu = $parsed; break; }
-                } catch (\Exception $e) {}
-            }
-            if (!$waktu) {
-                try { $waktu = Carbon::parse($waktuRaw); } catch (\Exception $e) {}
-            }
-
-            if (!$tanggal) {
-                $gagal++;
-                $errors[] = "Baris " . ($i + 1) . ": Format tanggal tidak dikenali — '$tanggalRaw'";
-                continue;
-            }
-
-            if (!$waktu) {
-                $gagal++;
-                $errors[] = "Baris " . ($i + 1) . ": Format waktu tidak dikenali — '$waktuRaw'";
-                continue;
-            }
-
-            // Combine tanggal and waktu
-            $fullDateTime = Carbon::parse($tanggal->toDateString() . ' ' . $waktu->toTimeString());
-
-            // Group by nama (case-insensitive) and date
-            $namaKey = strtolower($nama);
-            $dateKey = $tanggal->toDateString();
-
-            if (!isset($scansByGuruDate[$namaKey])) {
-                $scansByGuruDate[$namaKey] = [];
-            }
-            if (!isset($scansByGuruDate[$namaKey][$dateKey])) {
-                $scansByGuruDate[$namaKey][$dateKey] = [];
-            }
-
-            $scansByGuruDate[$namaKey][$dateKey][] = $fullDateTime;
-        }
-
-        // Process grouped scans
-        foreach ($scansByGuruDate as $namaKey => $datesData) {
-            // Find guru by name (case-insensitive)
-            $guru = Guru::where('status', 'aktif')
-                ->whereRaw('LOWER(nama) = ?', [$namaKey])
-                ->first();
+            // Find guru by nama (flexible matching)
+            $guru = $this->findGuruByName($namaGuruDariExcel);
 
             if (!$guru) {
                 $tidakDitemukan++;
-                $errors[] = "Nama guru '$namaKey' tidak ditemukan di database";
+                $errors[] = "Nama guru '$namaGuruDariExcel' tidak ditemukan di database";
                 continue;
             }
 
-            foreach ($datesData as $dateKey => $scans) {
-                // Sort scans by time
-                sort($scans);
+            foreach ($datesData as $dateKey => $data) {
+                $jamMasuk  = $data['jam_masuk'];
+                $jamPulang = $data['jam_pulang'];
+                $tanggal   = $data['tanggal'];
+                $today     = $tanggal->toDateString();
 
-                $jamMasuk = $scans[0]->toTimeString();
-                $jamKeluar = count($scans) > 1 ? end($scans)->toTimeString() : null;
+                // Calculate status based on jam masuk
+                $jamMasukCarbon = Carbon::parse($jadwal->jam_masuk)->setDateFrom($tanggal);
+                $batasAkhir     = $jadwal->batasAkhirPada($tanggal);
+                $waktuMasuk     = Carbon::parse($today . ' ' . $jamMasuk);
 
-                $today          = $dateKey;
-                $jamMasukCarbon = Carbon::parse($jadwal->jam_masuk)->setDateFrom($scans[0]);
-                $batasAkhir     = $jadwal->batasAkhirPada($scans[0]);
-
-                $status     = $scans[0]->lte($batasAkhir) ? 'hadir' : 'telat';
+                $status     = $waktuMasuk->lte($batasAkhir) ? 'hadir' : 'telat';
                 $menitTelat = $status === 'telat'
-                    ? (int) abs($scans[0]->diffInMinutes($jamMasukCarbon))
+                    ? (int) abs($waktuMasuk->diffInMinutes($jamMasukCarbon))
                     : 0;
 
                 // Check if presensi already exists
@@ -240,23 +261,24 @@ class FingerprintController extends Controller
                         'guru_id'    => $guru->id,
                         'tanggal'    => $today,
                         'jam_masuk'  => $jamMasuk,
-                        'jam_pulang' => $jamKeluar,
+                        'jam_pulang' => $jamPulang,
                         'status'     => $status,
                         'metode'     => 'fingerprint',
                         'menit_telat'=> $menitTelat,
                     ]);
                     $berhasil++;
                 } else {
-                    // Update if new scan is earlier for masuk or later for keluar
-                    if ($scans[0]->lt(Carbon::parse($today . ' ' . $presensi->jam_masuk))) {
+                    // Update jam masuk if earlier
+                    if ($waktuMasuk->lt(Carbon::parse($today . ' ' . $presensi->jam_masuk))) {
                         $presensi->update([
                             'jam_masuk' => $jamMasuk,
                             'status' => $status,
                             'menit_telat' => $menitTelat,
                         ]);
                     }
-                    if ($jamKeluar && (!$presensi->jam_pulang || Carbon::parse($today . ' ' . $jamKeluar)->gt(Carbon::parse($today . ' ' . $presensi->jam_pulang)))) {
-                        $presensi->update(['jam_pulang' => $jamKeluar]);
+                    // Update jam pulang if later
+                    if ($jamPulang && (!$presensi->jam_pulang || Carbon::parse($today . ' ' . $jamPulang)->gt(Carbon::parse($today . ' ' . $presensi->jam_pulang)))) {
+                        $presensi->update(['jam_pulang' => $jamPulang]);
                     }
                     $berhasil++;
                 }
@@ -265,7 +287,7 @@ class FingerprintController extends Controller
                 FingerprintLog::create([
                     'id_fingerprint' => $guru->id_pengguna,
                     'guru_id'        => $guru->id,
-                    'waktu_scan'     => $scans[0],
+                    'waktu_scan'     => $waktuMasuk,
                     'tipe'           => 'masuk',
                     'diproses'       => true,
                 ]);
@@ -340,5 +362,244 @@ class FingerprintController extends Controller
             'message' => "Presensi {$guru->nama} berhasil dicatat sebagai " . strtoupper($status) . ".",
             'data'    => ['guru' => $guru->nama, 'status' => $status, 'jam' => $waktu->toTimeString()],
         ]);
+    }
+
+    /**
+     * Normalize name for flexible matching
+     * 
+     * BUG FIX: Removed abbreviation expansion that was causing "S.Ag" → "syamsulag"
+     * The abbreviation mapping 's\.' => 'syamsul' was interfering with academic titles.
+     * 
+     * Process:
+     * 1. Lowercase and trim
+     * 2. Remove academic titles (with dots first)
+     * 3. Remove punctuation (dots, commas, apostrophes)
+     * 4. Clean up spaces
+     */
+    private function normalizeName($name)
+    {
+        // Trim, lowercase
+        $normalized = trim(strtolower($name));
+        
+        // Remove academic titles WITH dots first (before removing dots)
+        $titlesWithDots = [
+            's\.pd\.', 's\.pd',
+            's\.ag\.', 's\.ag',
+            's\.t\.', 's\.t',
+            'm\.si\.', 'm\.si',
+            's\.kom\.', 's\.kom',
+            's\.th\.i\.', 's\.th\.i',
+            'm\.pd\.', 'm\.pd',
+            'm\.p\.', 'm\.p',
+            's\.h\.', 's\.h',
+            's\.p\.', 's\.p',
+            's\.k\.', 's\.k',
+            's\.m\.', 's\.m',
+            'm\.a\.', 'm\.a',
+            'm\.hum\.', 'm\.hum',
+            'm\.kes\.', 'm\.kes',
+            'm\.farm\.', 'm\.farm',
+            'm\.si\.kom\.', 'm\.si\.kom',
+            's\.pd\.i\.', 's\.pd\.i',
+            'm\.pd\.i\.', 'm\.pd\.i',
+            's\.th\.', 's\.th',
+            's\.fi\.', 's\.fi',
+            's\.farm\.', 's\.farm',
+            's\.keperawatan\.', 's\.keperawatan',
+            's\.kebidanan\.', 's\.kebidanan',
+            's\.psi\.', 's\.psi',
+            'm\.ti\.', 'm\.ti',
+            'm\.ca\.', 'm\.ca',
+            'm\.ak\.', 'm\.ak',
+            'm\.kom\.', 'm\.kom',
+            'dr\.', 'dra\.', 'drs\.',
+        ];
+        
+        foreach ($titlesWithDots as $title) {
+            $normalized = preg_replace('/\b' . $title . '\b/i', '', $normalized);
+        }
+        
+        // Remove academic titles WITHOUT dots
+        $titlesWithoutDots = [
+            's pd', 's ag', 's t', 'm si', 's kom', 's th i',
+            'm pd', 'm p', 's h', 's p', 's k', 's m', 'm a',
+            'm hum', 'm kes', 'm farm', 'm si kom',
+            's pd i', 'm pd i', 's th', 's fi', 's farm',
+            's keperawatan', 's kebidanan', 's psi',
+            'm ti', 'm ca', 'm ak', 'm kom',
+            'dra', 'drs', 'dr',
+        ];
+        
+        foreach ($titlesWithoutDots as $title) {
+            $normalized = preg_replace('/\b' . preg_quote($title, '/') . '\b/i', '', $normalized);
+        }
+        
+        // Remove dots, commas, apostrophes
+        $normalized = str_replace(['.', ',', "'"], '', $normalized);
+        
+        // Convert multiple spaces to single space
+        $normalized = preg_replace('/\s+/', ' ', $normalized);
+        
+        // Trim again
+        $normalized = trim($normalized);
+        
+        return $normalized;
+    }
+
+    /**
+     * Calculate similarity percentage between two strings using Levenshtein distance
+     */
+    private function calculateSimilarity($str1, $str2)
+    {
+        $len1 = strlen($str1);
+        $len2 = strlen($str2);
+        
+        if ($len1 === 0 || $len2 === 0) {
+            return 0;
+        }
+        
+        $distance = levenshtein($str1, $str2);
+        $maxLen = max($len1, $len2);
+        
+        // Calculate similarity percentage
+        $similarity = (1 - ($distance / $maxLen)) * 100;
+        
+        return $similarity;
+    }
+
+    /**
+     * Find best match using fuzzy matching with Levenshtein distance
+     */
+    private function findBestFuzzyMatch($input, $candidates, $threshold = 80)
+    {
+        $bestMatch = null;
+        $bestSimilarity = 0;
+        $bestGuruId = null;
+        
+        foreach ($candidates as $guruId => $candidate) {
+            $similarity = $this->calculateSimilarity($input, $candidate);
+            
+            if ($similarity > $bestSimilarity && $similarity >= $threshold) {
+                $bestSimilarity = $similarity;
+                $bestMatch = $candidate;
+                $bestGuruId = $guruId;
+            }
+        }
+        
+        return [
+            'match' => $bestMatch,
+            'guru_id' => $bestGuruId,
+            'similarity' => $bestSimilarity,
+        ];
+    }
+
+    /**
+     * Find guru by name with flexible matching
+     * 
+     * Matching strategy (in order):
+     * 1. Exact match (case-insensitive, trimmed)
+     * 2. Normalized match (after removing academic titles and punctuation)
+     * 3. LIKE query (partial match)
+     * 4. Fuzzy matching (Levenshtein distance, 80% threshold)
+     */
+    private function findGuruByName($name)
+    {
+        $normalizedInput = $this->normalizeName($name);
+        $matchingMethod = null;
+        $matchedGuru = null;
+        $similarityPercent = 0;
+        $normalizedDBName = '';
+
+        // Try exact match first
+        $guru = Guru::where('status', 'aktif')
+            ->whereRaw('LOWER(TRIM(nama)) = ?', [$normalizedInput])
+            ->first();
+
+        if ($guru) {
+            $matchingMethod = 'exact';
+            $matchedGuru = $guru;
+            $normalizedDBName = $this->normalizeName($guru->nama);
+            $similarityPercent = 100;
+        }
+
+        // Try normalized match
+        if (!$matchedGuru) {
+            $allGurus = Guru::where('status', 'aktif')->get();
+
+            foreach ($allGurus as $guru) {
+                $normalizedDBName = $this->normalizeName($guru->nama);
+
+                // Check if normalized names match exactly
+                if ($normalizedInput === $normalizedDBName) {
+                    $matchingMethod = 'normalized';
+                    $matchedGuru = $guru;
+                    $similarityPercent = 100;
+                    break;
+                }
+
+                // Check if input is contained in DB name or vice versa
+                if (strpos($normalizedInput, $normalizedDBName) !== false ||
+                    strpos($normalizedDBName, $normalizedInput) !== false) {
+                    $matchingMethod = 'normalized';
+                    $matchedGuru = $guru;
+                    $similarityPercent = $this->calculateSimilarity($normalizedInput, $normalizedDBName);
+                    break;
+                }
+            }
+        }
+
+        // Try LIKE query as fallback
+        if (!$matchedGuru) {
+            $guru = Guru::where('status', 'aktif')
+                ->whereRaw('LOWER(nama) LIKE ?', ['%' . $normalizedInput . '%'])
+                ->first();
+
+            if ($guru) {
+                $matchingMethod = 'like';
+                $matchedGuru = $guru;
+                $normalizedDBName = $this->normalizeName($guru->nama);
+                $similarityPercent = $this->calculateSimilarity($normalizedInput, $normalizedDBName);
+            }
+        }
+
+        // Try fuzzy matching as final fallback (80% threshold)
+        if (!$matchedGuru) {
+            $allGurus = Guru::where('status', 'aktif')->get();
+            $candidates = [];
+            
+            foreach ($allGurus as $guru) {
+                $candidates[$guru->id] = $this->normalizeName($guru->nama);
+            }
+            
+            $fuzzyResult = $this->findBestFuzzyMatch($normalizedInput, $candidates, 80);
+            
+            if ($fuzzyResult['match'] !== null) {
+                $matchedGuru = $allGurus->find($fuzzyResult['guru_id']);
+                $matchingMethod = 'fuzzy';
+                $normalizedDBName = $fuzzyResult['match'];
+                $similarityPercent = $fuzzyResult['similarity'];
+            }
+        }
+
+        // Log matching result with comprehensive debug info
+        if ($matchedGuru) {
+            \Log::info('Fingerprint Import - Guru Matched', [
+                'excel_name_original' => $name,
+                'excel_name_normalized' => $normalizedInput,
+                'db_name_original' => $matchedGuru->nama,
+                'db_name_normalized' => $normalizedDBName,
+                'matching_method' => $matchingMethod,
+                'similarity_percent' => round($similarityPercent, 2),
+            ]);
+        } else {
+            \Log::warning('Fingerprint Import - Guru Not Found', [
+                'excel_name_original' => $name,
+                'excel_name_normalized' => $normalizedInput,
+                'matching_method' => 'none',
+                'similarity_percent' => 0,
+            ]);
+        }
+
+        return $matchedGuru;
     }
 }
